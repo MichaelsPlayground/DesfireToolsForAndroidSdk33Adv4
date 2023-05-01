@@ -1,7 +1,5 @@
 package de.androidcrypto.desfiretoolsforandroidsdk33;
 
-import java.util.List;
-
 import android.app.Activity;
 import android.app.Fragment;
 import android.os.Bundle;
@@ -12,9 +10,10 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 
 import com.github.skjolber.desfire.ev1.model.DesfireApplication;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-public class ApplicationListFragment extends Fragment {
+import java.util.List;
+
+public class ApplicationListFragmentOrg extends Fragment {
 
 	private List<DesfireApplication> applications;
 	
@@ -37,9 +36,6 @@ public class ApplicationListFragment extends Fragment {
         if(getActivity() != null) {
         	listView.setAdapter(new ApplicationListItemAdapter(getActivity(), applications));
         }
-
-		// added
-		FloatingActionButton addButton = (FloatingActionButton)view.findViewById(R.id.fab);
         
         return view;
     }
