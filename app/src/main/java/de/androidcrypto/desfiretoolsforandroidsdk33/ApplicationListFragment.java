@@ -37,9 +37,6 @@ public class ApplicationListFragment extends Fragment {
         if(getActivity() != null) {
         	listView.setAdapter(new ApplicationListItemAdapter(getActivity(), applications));
         }
-
-		// added
-		FloatingActionButton addButton = (FloatingActionButton)view.findViewById(R.id.fab);
         
         return view;
     }
