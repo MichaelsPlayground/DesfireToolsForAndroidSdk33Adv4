@@ -135,5 +135,6 @@
     <string name="nfcNotEnabledMessage">NFC is disabled, please enable it before continuing.</string>
     <string name="addApplication">add an application</string>
     <string name="applicationAdd">add application</string>
+    <string name="applicationNew">Add an application</string>
 
 </resources>

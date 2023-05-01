@@ -38,6 +38,8 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import androidx.fragment.app.Fragment;
+
 import com.github.skjolber.desfire.ev1.model.DesfireApplication;
 import com.github.skjolber.desfire.ev1.model.DesfireApplicationId;
 import com.github.skjolber.desfire.ev1.model.DesfireApplicationKey;
@@ -457,8 +459,6 @@ public class MainActivity extends Activity implements ReaderCallback, FragmentMa
 		transaction.commit();
 	}
 
-	
-
 	private void showApplicationFragment() {
 		Log.d(TAG, "showApplicationFragment");
 		
@@ -638,6 +638,63 @@ public class MainActivity extends Activity implements ReaderCallback, FragmentMa
 		transaction.commit();		
 	}
 
+	private void showApplicationNewFragment() {
+		Log.d(TAG, "showApplicationNewFragment");
+
+		// Create new fragment and transaction
+		final ApplicationNewFragment newFragment = new ApplicationNewFragment();
+		//final FileListFragment newFragment = new FileListFragment();
+
+		//newFragment.setApplication(application);
+
+		/* new with AppCompatActivity
+		final ApplicationNewFragment newFragment = new ApplicationNewFragment();
+		Fragment fragment = new ApplicationNewFragment();
+		getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, selectedFragment).commit();
+		*/
+
+		newFragment.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View view) {
+				System.out.println("*** createApplication pressed");
+
+				newFragment.getLogData("createApplication pressed");
+
+				// com.github.skjolber.desfire.libfreefare.MifareDesfire.java
+				// line 628
+				// public static int
+				//	create_application (MifareTag tag, DesfireApplicationId aid, byte settings1, byte settings2, int want_iso_application,
+				//	int want_iso_file_identifiers, /* uint16 */ int iso_file_id, byte[] iso_file_name, int iso_file_name_len) throws Exception
+				// mifare_desfire_create_application_aes (MifareTag tag, DesfireApplicationId aid, byte settings, byte key_no) throws Exception
+				byte[] aid = new byte[]{(byte) 0x08, (byte) 0x08, (byte) 0x01};
+				DesfireApplicationId desfireApplicationId = new DesfireApplicationId(aid);
+				byte keySettings = (byte) 0x0f;
+				byte numberOfKeys = (byte) 0x03;
+				int result = -99;
+				try {
+					result = mifare_desfire_create_application_aes(tag, desfireApplicationId, keySettings, numberOfKeys);
+				} catch (Exception e) {
+					//throw new RuntimeException(e);
+					newFragment.getLogData("createApplication error: " + e.getMessage());
+				}
+				if (result == 0) {
+					newFragment.getLogData("createApplication success");
+				} else {
+					newFragment.getLogData("createApplication failure: " + result);
+				}
+			}
+		});
+
+		FragmentTransaction transaction = getFragmentManager().beginTransaction();
+		// Replace whatever is in the fragment_container view with this fragment,
+		// and add the transaction to the back stack
+		transaction.replace(R.id.content, newFragment, "addApplication");
+		transaction.addToBackStack("addApplication");
+		// Commit the transaction
+		transaction.commit();
+
+	}
+
 	private String getName(DesfireKeyType type) {
 		switch(type) {
 			case TDES : return getString(R.string.applicationAuthenticateKey3DES);
@@ -653,7 +710,8 @@ public class MainActivity extends Activity implements ReaderCallback, FragmentMa
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 	    MenuInflater inflater = getMenuInflater();
-	    inflater.inflate(R.menu.main, menu);
+	    //inflater.inflate(R.menu.main, menu);
+		inflater.inflate(R.menu.main_add_application, menu); // changed
 	    
 	    return true;
 	}
@@ -667,18 +725,35 @@ public class MainActivity extends Activity implements ReaderCallback, FragmentMa
 		MenuItem keys = menu.findItem(R.id.action_settings);
 		MenuItem addKey = menu.findItem(R.id.action_add);
 		MenuItem save = menu.findItem(R.id.action_save);
+		MenuItem addApplication = menu.findItem(R.id.action_add_app); // appended
 
 		FragmentManager fragmentManager = getFragmentManager();
-		
+
 		String name = fragmentManager.getBackStackEntryAt(fragmentManager.getBackStackEntryCount() - 1).getName();
 		if(name != null && name.equals("keys")) {
 			keys.setVisible(false);
 			addKey.setVisible(true);
+			addApplication.setVisible(true); // added
 		} else {
 			keys.setVisible(true);
 			addKey.setVisible(false);
+			addApplication.setVisible(false); // added
 		}
-		
+
+		// added
+		if(name != null && name.equals("applications")) {
+			//keys.setVisible(false);
+			//addKey.setVisible(true);
+			addApplication.setVisible(true); // added
+		} else {
+			//keys.setVisible(true);
+			//addKey.setVisible(false);
+			addApplication.setVisible(false); // added
+		}
+
+		System.out.println("**** name: " + name + " ***");
+
+
 		Log.d(TAG, "Prepare options menu for " + name);
 		if(name != null && name.equals("file")) {
 			getFragmentManager().executePendingTransactions();
@@ -709,6 +784,9 @@ public class MainActivity extends Activity implements ReaderCallback, FragmentMa
 			return true;
 		} else if (item.getItemId() == R.id.action_save) {
 			saveFileData();
+			return true;
+		} else if (item.getItemId() == R.id.action_add_app) { // added
+			showApplicationNewFragment();
 			return true;
 		} else {
 			return super.onOptionsItemSelected(item);
@@ -798,6 +876,8 @@ public class MainActivity extends Activity implements ReaderCallback, FragmentMa
 		// Commit the transaction
 		transaction.commit();		
 	}
+
+
 
 	private boolean authenticate(DesfireApplicationKey desfireApplicationKey) throws Exception {
 		
@@ -1128,9 +1208,6 @@ public class MainActivity extends Activity implements ReaderCallback, FragmentMa
 	        }
 	    	getFragmentManager().popBackStack();
 
-			
-			
-			
 		}
 	}
 

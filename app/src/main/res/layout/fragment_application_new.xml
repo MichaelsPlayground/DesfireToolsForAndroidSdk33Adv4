@@ -1,0 +1,50 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent"
+
+	android:orientation="vertical"
+	android:background="@color/white"
+	android:paddingLeft="@dimen/activity_horizontal_fragment_margin"
+	android:paddingRight="@dimen/activity_horizontal_fragment_margin">
+	
+	    <TextView
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:text="@string/applicationNew"
+	        android:layout_marginBottom="10dp"
+	        android:textSize="30sp"
+	        android:layout_gravity="center_horizontal"
+	        />
+
+	<EditText
+		android:id="@+id/etApplicationId"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_marginStart="8dp"
+		android:layout_marginTop="16dp"
+		android:layout_marginEnd="8dp"
+		android:ems="10"
+		android:inputType="text"
+		android:text="080801" />
+
+	<Button
+		android:id="@+id/btnCreateApplication"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_marginStart="8dp"
+		android:layout_marginTop="16dp"
+		android:layout_marginEnd="8dp"
+		android:text="create application" />
+
+	<EditText
+		android:id="@+id/etLog"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_marginStart="8dp"
+		android:layout_marginTop="16dp"
+		android:layout_marginEnd="8dp"
+		android:ems="10"
+		android:inputType="text"
+		android:text="The log will appear here" />
+
+</LinearLayout>
