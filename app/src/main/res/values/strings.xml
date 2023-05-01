@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Mifare Desfire Tool SDK33</string>
+    <string name="app_name">Mifare Desfire Tool SDK33 Adv1</string>
 
     <string name="applicationList">Application list</string>
     <string name="applicationId">Application %s</string>
@@ -98,6 +98,12 @@
 
     <string name="fileRecords">Records</string>
     <string name="fileRecordRecord">#%d</string>
+
+    <!-- added by AndroidCrypto -->
+    <string name="fileStandard">Data in file</string>
+    <string name="fileStandardHex">Hex:</string>
+    <string name="fileStandardString">Str:</string>
+
 
     <string name="keys">Keys</string>
     <string name="keyList">Access keys</string>

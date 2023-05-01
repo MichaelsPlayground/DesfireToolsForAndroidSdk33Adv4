@@ -61,3 +61,8 @@ See the example application.
 [MIFARE DESFire EV1]:                   https://en.wikipedia.org/wiki/MIFARE#MIFARE_DESFire_EV1_(previously_called_DESFire8)
 [libfreefare]:                          https://github.com/nfc-tools/libfreefare
 [nfcjlib]:                              https://github.com/Andrade/nfcjlib
+
+## Changes by MichaelsPlayground & AndroidCrypto
+
+1) de.androidcrypto.desfiretoolsforandroidsdk33.FileFragment.java: show content of StandardFile in hex and string representation
+2) xx

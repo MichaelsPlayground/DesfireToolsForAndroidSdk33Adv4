@@ -1,10 +1,5 @@
 package de.androidcrypto.desfiretoolsforandroidsdk33;
 
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
@@ -21,6 +16,9 @@ import com.github.skjolber.desfire.ev1.model.file.RecordDesfireFile;
 import com.github.skjolber.desfire.ev1.model.file.StandardDesfireFile;
 import com.github.skjolber.desfire.ev1.model.file.ValueDesfireFile;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import de.androidcrypto.desfiretoolsforandroidsdk33.filelist.ApplicationDetail;
 import de.androidcrypto.desfiretoolsforandroidsdk33.filelist.ApplicationDetailAccessKey;
 import de.androidcrypto.desfiretoolsforandroidsdk33.filelist.ApplicationDetailHeader;
@@ -28,7 +26,7 @@ import de.androidcrypto.desfiretoolsforandroidsdk33.filelist.ApplicationDetailRe
 import de.androidcrypto.desfiretoolsforandroidsdk33.filelist.ApplicationDetailSetting;
 
 
-public class FileFragment extends Fragment {
+public class FileFragmentOrg extends Fragment {
 
 	private DesfireFile file;
 	
@@ -115,19 +113,6 @@ public class FileFragment extends Fragment {
 				StandardDesfireFile standardDesfireFile = (StandardDesfireFile)file;
 				
 				details.add(new ApplicationDetailSetting(getString(R.string.fileSize), getString(R.string.fileSizeBytes, standardDesfireFile.getFileSize())));
-
-				// todo AndroidCrypto added the data read from file
-				byte[] data = standardDesfireFile.getData();
-				if (data != null) {
-					// sometimes the getData has an appended byte
-					if (data.length > standardDesfireFile.getFileSize()) {
-						data = Arrays.copyOf(data, standardDesfireFile.getFileSize());
-					}
-					details.add(new ApplicationDetailHeader(activity.getString(R.string.fileStandard)));
-					details.add(new ApplicationDetailRecord(activity.getString(R.string.fileStandardHex), Utils.getHexString(data), data));
-					details.add(new ApplicationDetailRecord(activity.getString(R.string.fileStandardString), new String(data, StandardCharsets.UTF_8), data));
-				}
-
 			} else if(file instanceof ValueDesfireFile) {
 				ValueDesfireFile valueDesfireFile = (ValueDesfireFile)file;
 
@@ -158,7 +143,7 @@ public class FileFragment extends Fragment {
 					for(int i = 0; i < recordDesfireFile.getCurrentRecords(); i ++) {
 						byte[] record = new byte[recordSize];
 						System.arraycopy(value, i * recordSize, record, 0, recordSize);
-						details.add(new ApplicationDetailRecord(activity.getString(R.string.fileRecordRecord, i), Utils.getHexString(record), record));
+						details.add(new ApplicationDetailRecord(getString(R.string.fileRecordRecord, i), Utils.getHexString(record), record));
 					}
 				}
 				
