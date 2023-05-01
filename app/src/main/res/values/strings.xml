@@ -136,5 +136,10 @@
     <string name="addApplication">add an application</string>
     <string name="applicationAdd">add application</string>
     <string name="applicationNew">Add an application</string>
+    <string name="fileNew">add a file</string>
+    <string name="fileAdd">add file</string>
+    <string name="rbStandardFile">create a standard file</string>
+    <string name="rbValueFile">create a value file</string>
+    <string name="rbCyclicFile">create a cyclic record file</string>
 
 </resources>

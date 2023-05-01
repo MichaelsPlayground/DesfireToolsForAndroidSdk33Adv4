@@ -69,4 +69,28 @@ public class Utils {
         }
         return value;
     }
+
+    // added
+    public static byte[] hexStringToByteArray(String s) {
+        if (!checkStringForHexadecimalValue(s)) return null;
+        int len = s.length();
+        byte[] data = new byte[len / 2];
+        for (int i = 0; i < len; i += 2) {
+            data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
+                    + Character.digit(s.charAt(i + 1), 16));
+        }
+        return data;
+    }
+
+    public static boolean checkStringForHexadecimalValue(String s) {
+        try{
+            int hexadecimalValue = Integer.parseInt(s, 16);
+            System.out.println("valid hexadecimal");
+            return true;
+        }  catch(NumberFormatException e){
+            // not a valid hex
+            System.out.println("not a valid hexadecimal");
+            return false;
+        }
+    }
 }

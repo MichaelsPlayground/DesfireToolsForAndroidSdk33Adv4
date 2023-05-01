@@ -10,14 +10,14 @@
 	    <TextView
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"
-	        android:text="@string/applicationNew"
+	        android:text="@string/fileNew"
 	        android:layout_marginBottom="10dp"
 	        android:textSize="30sp"
 	        android:layout_gravity="center_horizontal"
 	        />
 
 	<EditText
-		android:id="@+id/etApplicationId"
+		android:id="@+id/etFileId"
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
 		android:layout_marginStart="8dp"
@@ -25,16 +25,38 @@
 		android:layout_marginEnd="8dp"
 		android:ems="10"
 		android:inputType="text"
-		android:text="080801" />
+		android:text="01" />
+
+	<RadioGroup xmlns:android="http://schemas.android.com/apk/res/android"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:orientation="vertical">
+		<RadioButton android:id="@+id/rbStandardFile"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:checked="true"
+			android:text="@string/rbStandardFile"
+			/>
+		<RadioButton android:id="@+id/rbValueFile"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="@string/rbValueFile"
+			/>
+		<RadioButton android:id="@+id/rbCyclicFile"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="@string/rbCyclicFile"
+			/>
+	</RadioGroup>
 
 	<Button
-		android:id="@+id/btnCreateApplication"
+		android:id="@+id/btnCreateFile"
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
 		android:layout_marginStart="8dp"
 		android:layout_marginTop="16dp"
 		android:layout_marginEnd="8dp"
-		android:text="create application" />
+		android:text="create file" />
 
 	<TextView
 		android:id="@+id/tvLog"

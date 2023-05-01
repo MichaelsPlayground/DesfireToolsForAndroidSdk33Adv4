@@ -26,6 +26,7 @@ import android.nfc.Tag;
 import android.nfc.tech.IsoDep;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -169,7 +170,7 @@ public class MainActivity extends Activity implements ReaderCallback, FragmentMa
 		
 		DefaultIsoDepWrapper isoDepWrapper = new DefaultIsoDepWrapper(isoDep);
 		
-		defaultIsoDepAdapter = new DefaultIsoDepAdapter(isoDepWrapper, false);
+		defaultIsoDepAdapter = new DefaultIsoDepAdapter(isoDepWrapper, true); // todo change back to false
 		
 		try {
 			isoDep.connect();
@@ -278,6 +279,7 @@ public class MainActivity extends Activity implements ReaderCallback, FragmentMa
 					MainActivity.this.authenticatedKey = null;
 
 					try {
+
 						if(tag.getSelectedApplication() != application.getIdInt()) {
 							
 							if(!isConnected()) {
@@ -638,6 +640,7 @@ public class MainActivity extends Activity implements ReaderCallback, FragmentMa
 		transaction.commit();		
 	}
 
+	// added
 	private void showApplicationNewFragment() {
 		Log.d(TAG, "showApplicationNewFragment");
 
@@ -658,29 +661,115 @@ public class MainActivity extends Activity implements ReaderCallback, FragmentMa
 			public void onClick(View view) {
 				System.out.println("*** createApplication pressed");
 
-				newFragment.getLogData("createApplication pressed");
-
+				// sanity checks on AID
+				String inputAid = newFragment.getAid();
+				if (TextUtils.isEmpty(inputAid)) {
+					newFragment.setLogData("please enter a 6 hex character long string");
+					return;
+				}
+				if (inputAid.length() != 6) {
+					newFragment.setLogData("please enter a 6 hex character long string");
+					return;
+				}
+				byte[] aidByte;
+				aidByte = Utils.hexStringToByteArray(inputAid);
+				if (aidByte == null) {
+					newFragment.setLogData("please enter a 6 hex character long string");
+					return;
+				}
+				System.out.println("aidByte: " + Utils.getHexString(aidByte));
 				// com.github.skjolber.desfire.libfreefare.MifareDesfire.java
+
+				// select master application
+				//public static int mifare_desfire_select_application (MifareTag tag, DesfireApplicationId aid) throws Exception
+				int selectMasterApplicationResult = -99;
+				try {
+					selectMasterApplicationResult = mifare_desfire_select_application(tag, null);
+				} catch (Exception e) {
+					// throw new RuntimeException(e);
+					newFragment.setLogData("createApplication error: " + e.getMessage());
+					return;
+				}
+				if (selectMasterApplicationResult == 0) {
+					newFragment.setLogData("createApplication success");
+				} else {
+					newFragment.setLogData("createApplication failure: " + selectMasterApplicationResult);
+					return;
+				}
+
+				// how to authenticate for create an application ?
+				if (application == null) {
+					System.out.println("application is null");
+
+					//applications = new ArrayList<DesfireApplication>();
+
+					//DesfireApplication desfireApplication = new DesfireApplication();
+					//desfireApplication.setId(new byte[3]); // master application
+					//applications.add(desfireApplication);
+				}
+				application = applications.get(0); // master application
+				System.out.println("*** application: " + application.toString());
+				System.out.println("*** application idString: " + application.getIdString());
+				System.out.println("*** application hasKeys: " + application.hasKeys());
+
+
+				DesfireApplicationKeySettings keySettings = application.getKeySettings();
+				Log.d(TAG, keySettings.toString());
+				if(keySettings.isRequiresMasterKeyForDirectoryList()) {
+					final List<DesfireApplicationKey> keys = application.getKeys();
+					final DesfireApplicationKey root = keys.get(0);
+					showKeySelector(keySettings.getType(), new OnKeyListener() {
+						@Override
+						public void onKey(DesfireKey key) {
+							if(!isConnected()) {
+								Log.d(TAG, "Tag lost wanting to select application");
+								onTagLost();
+								return;
+							}
+							try {
+								DesfireApplicationKey clone = new DesfireApplicationKey(root.getIndex(), key);
+								if(authenticate(clone)) {
+									MainActivity.this.authenticatedKey = clone;
+									// todo run the code after auth here ?
+									//readApplicationFiles();
+									//showApplicationFragment();
+									showToast(R.string.applicationAuthenticatedSuccess);
+								} else {
+									showToast(R.string.applicationAuthenticatedFail);
+								}
+
+							} catch (Exception e) {
+								Log.d(TAG, "Unable to authenticate", e);
+								showToast(R.string.applicationAuthenticatedFail);
+							}
+						}
+					});
+				} else {
+					Log.d(TAG, "Can't authenticate an application");
+				}
+
 				// line 628
 				// public static int
 				//	create_application (MifareTag tag, DesfireApplicationId aid, byte settings1, byte settings2, int want_iso_application,
 				//	int want_iso_file_identifiers, /* uint16 */ int iso_file_id, byte[] iso_file_name, int iso_file_name_len) throws Exception
 				// mifare_desfire_create_application_aes (MifareTag tag, DesfireApplicationId aid, byte settings, byte key_no) throws Exception
-				byte[] aid = new byte[]{(byte) 0x08, (byte) 0x08, (byte) 0x01};
-				DesfireApplicationId desfireApplicationId = new DesfireApplicationId(aid);
-				byte keySettings = (byte) 0x0f;
+				//byte[] aid = new byte[]{(byte) 0x08, (byte) 0x08, (byte) 0x01};
+				DesfireApplicationId desfireApplicationId = new DesfireApplicationId(aidByte);
+				byte aidKeySettings = (byte) 0x0f;
 				byte numberOfKeys = (byte) 0x03;
 				int result = -99;
 				try {
-					result = mifare_desfire_create_application_aes(tag, desfireApplicationId, keySettings, numberOfKeys);
+					result = mifare_desfire_create_application_aes(tag, desfireApplicationId, aidKeySettings, numberOfKeys);
 				} catch (Exception e) {
 					//throw new RuntimeException(e);
-					newFragment.getLogData("createApplication error: " + e.getMessage());
+					newFragment.setLogData("createApplication error: " + e.getMessage());
+					return;
 				}
 				if (result == 0) {
-					newFragment.getLogData("createApplication success");
+					newFragment.setLogData("createApplication success");
 				} else {
-					newFragment.getLogData("createApplication failure: " + result);
+					newFragment.setLogData("createApplication failure: " + result);
+					return;
 				}
 			}
 		});
@@ -694,6 +783,160 @@ public class MainActivity extends Activity implements ReaderCallback, FragmentMa
 		transaction.commit();
 
 	}
+
+	// added
+	private void showFileNewFragment() {
+		Log.d(TAG, "showFileNewFragment");
+
+		// Create new fragment and transaction
+		final FileNewFragment newFragment = new FileNewFragment(application);
+		//final FileListFragment newFragment = new FileListFragment();
+
+		//newFragment.setApplication(application);
+
+		/* new with AppCompatActivity
+		final ApplicationNewFragment newFragment = new ApplicationNewFragment();
+		Fragment fragment = new ApplicationNewFragment();
+		getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, selectedFragment).commit();
+		*/
+
+		newFragment.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View view) {
+				System.out.println("*** createFile pressed");
+
+				// sanity checks on AID
+				String inputFid = newFragment.getFid();
+				if (TextUtils.isEmpty(inputFid)) {
+					newFragment.setLogData("please enter a 2 hex character long string");
+					return;
+				}
+				if (inputFid.length() != 2) {
+					newFragment.setLogData("please enter a 2 hex character long string");
+					return;
+				}
+				byte[] fidByte;
+				fidByte = Utils.hexStringToByteArray(inputFid);
+				if (fidByte == null) {
+					newFragment.setLogData("please enter a 2 hex character long string");
+					return;
+				}
+				System.out.println("fidByte: " + Utils.getHexString(fidByte));
+				// com.github.skjolber.desfire.libfreefare.MifareDesfire.java
+
+				// select application
+				//public static int mifare_desfire_select_application (MifareTag tag, DesfireApplicationId aid) throws Exception
+				int selectApplicationResult = -99;
+				byte[] selectedAid = newFragment.getApplication().getId();
+				DesfireApplicationId desfireApplicationId = new DesfireApplicationId(selectedAid);
+				try {
+					selectApplicationResult = mifare_desfire_select_application(tag, desfireApplicationId);
+				} catch (Exception e) {
+					// throw new RuntimeException(e);
+					newFragment.setLogData("selectApplication error: " + e.getMessage());
+					return;
+				}
+				if (selectApplicationResult == 0) {
+					newFragment.setLogData("selectApplication success");
+				} else {
+					newFragment.setLogData("selectApplication failure: " + selectApplicationResult);
+					return;
+				}
+
+				// how to authenticate for create a file ?
+				if (application == null) {
+					System.out.println("application is null");
+
+					//applications = new ArrayList<DesfireApplication>();
+
+					//DesfireApplication desfireApplication = new DesfireApplication();
+					//desfireApplication.setId(new byte[3]); // master application
+					//applications.add(desfireApplication);
+				}
+				//application = applications.get(0); // master application
+				System.out.println("*** application: " + application.toString());
+				System.out.println("*** application idString: " + application.getIdString());
+				System.out.println("*** application hasKeys: " + application.hasKeys());
+
+
+				DesfireApplicationKeySettings keySettings = application.getKeySettings();
+				Log.d(TAG, keySettings.toString());
+				//if(keySettings.isRequiresMasterKeyForDirectoryList()) {
+					final List<DesfireApplicationKey> keys = application.getKeys();
+					final DesfireApplicationKey root = keys.get(0);
+					showKeySelector(keySettings.getType(), new OnKeyListener() {
+						@Override
+						public void onKey(DesfireKey key) {
+							if(!isConnected()) {
+								Log.d(TAG, "Tag lost wanting to select application");
+								onTagLost();
+								return;
+							}
+							try {
+								DesfireApplicationKey clone = new DesfireApplicationKey(root.getIndex(), key);
+								if(authenticate(clone)) {
+									MainActivity.this.authenticatedKey = clone;
+									// todo run the code after auth here ?
+									//readApplicationFiles();
+									//showApplicationFragment();
+									showToast(R.string.applicationAuthenticatedSuccess);
+								} else {
+									showToast(R.string.applicationAuthenticatedFail);
+								}
+
+							} catch (Exception e) {
+								Log.d(TAG, "Unable to authenticate", e);
+								showToast(R.string.applicationAuthenticatedFail);
+							}
+						}
+					});
+/*
+				} else {
+					Log.d(TAG, "Can't create an application");
+				}
+*/
+				// line 628
+				// public static int
+
+				// mifare_desfire_create_std_data_file (MifareTag tag, byte file_no, byte communication_settings, int access_rights, int file_size) throws Exception
+
+				byte fileNumber = (byte) 0x03;
+				byte communicationSettings = (byte) 0x03;
+				/*
+				if (communicationSetting == CommunicationSetting.Plain) communicationSettings = (byte) 0x00;
+        		if (communicationSetting == CommunicationSetting.MACed) communicationSettings = (byte) 0x01;
+        		if (communicationSetting == CommunicationSetting.Encrypted) communicationSettings = (byte) 0x03;
+				 */
+				int accessRights = 18; // 0x00 0x12 = Read&Write Access & ChangeAccessRights | Read Access & Write Access
+				int fileSize = 32;
+				int result = -99;
+				try {
+					result = mifare_desfire_create_std_data_file(tag, fileNumber, communicationSettings, accessRights, fileSize);
+				} catch (Exception e) {
+					//throw new RuntimeException(e);
+					newFragment.setLogData("createFile error: " + e.getMessage());
+					return;
+				}
+				if (result == 0) {
+					newFragment.setLogData("createFil success");
+				} else {
+					newFragment.setLogData("createFile failure: " + result);
+					return;
+				}
+			}
+		});
+
+		FragmentTransaction transaction = getFragmentManager().beginTransaction();
+		// Replace whatever is in the fragment_container view with this fragment,
+		// and add the transaction to the back stack
+		transaction.replace(R.id.content, newFragment, "addFile");
+		transaction.addToBackStack("addFile");
+		// Commit the transaction
+		transaction.commit();
+
+	}
+
+
 
 	private String getName(DesfireKeyType type) {
 		switch(type) {
@@ -725,7 +968,8 @@ public class MainActivity extends Activity implements ReaderCallback, FragmentMa
 		MenuItem keys = menu.findItem(R.id.action_settings);
 		MenuItem addKey = menu.findItem(R.id.action_add);
 		MenuItem save = menu.findItem(R.id.action_save);
-		MenuItem addApplication = menu.findItem(R.id.action_add_app); // appended
+		MenuItem addApplication = menu.findItem(R.id.action_add_app); // added
+		MenuItem addFile = menu.findItem(R.id.action_add_file); // added
 
 		FragmentManager fragmentManager = getFragmentManager();
 
@@ -733,11 +977,14 @@ public class MainActivity extends Activity implements ReaderCallback, FragmentMa
 		if(name != null && name.equals("keys")) {
 			keys.setVisible(false);
 			addKey.setVisible(true);
-			addApplication.setVisible(true); // added
+			addApplication.setVisible(false); // added
+			addFile.setVisible(false); // added
+
 		} else {
 			keys.setVisible(true);
 			addKey.setVisible(false);
 			addApplication.setVisible(false); // added
+			addFile.setVisible(false); // added
 		}
 
 		// added
@@ -745,13 +992,20 @@ public class MainActivity extends Activity implements ReaderCallback, FragmentMa
 			//keys.setVisible(false);
 			//addKey.setVisible(true);
 			addApplication.setVisible(true); // added
+			addFile.setVisible(false); // added
 		} else {
 			//keys.setVisible(true);
 			//addKey.setVisible(false);
 			addApplication.setVisible(false); // added
+			addFile.setVisible(false); // added
+		}
+		System.out.println("*** name: " + fragmentManager.getBackStackEntryAt(fragmentManager.getBackStackEntryCount() - 1).getName());
+		if(name != null && name.equals("application")) {
+			addFile.setVisible(true); // added
+		} else {
+			addFile.setVisible(false); // added
 		}
 
-		System.out.println("**** name: " + name + " ***");
 
 
 		Log.d(TAG, "Prepare options menu for " + name);
@@ -787,6 +1041,9 @@ public class MainActivity extends Activity implements ReaderCallback, FragmentMa
 			return true;
 		} else if (item.getItemId() == R.id.action_add_app) { // added
 			showApplicationNewFragment();
+			return true;
+		} else if (item.getItemId() == R.id.action_add_file) { // added
+			showFileNewFragment();
 			return true;
 		} else {
 			return super.onOptionsItemSelected(item);
@@ -1150,8 +1407,7 @@ public class MainActivity extends Activity implements ReaderCallback, FragmentMa
 				
 				return;
 			}
-	
-			
+
 			FileFragment fragment = (FileFragment) getFragmentManager().findFragmentByTag("file");
 			
 			DesfireFile file = fragment.getFile();
@@ -1170,8 +1426,6 @@ public class MainActivity extends Activity implements ReaderCallback, FragmentMa
 			} else {
 				throw new IllegalArgumentException();
 			}
-			
-		
 			FileOutputStream out = null;
 			try {
 				File outputFile = new File(absolutePath, fileName);
