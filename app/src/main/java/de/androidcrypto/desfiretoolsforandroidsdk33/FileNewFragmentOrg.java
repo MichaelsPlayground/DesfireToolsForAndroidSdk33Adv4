@@ -1,6 +1,8 @@
 package de.androidcrypto.desfiretoolsforandroidsdk33;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.app.Fragment;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,8 +10,6 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-
-import androidx.fragment.app.Fragment;
 
 import com.github.skjolber.desfire.ev1.model.DesfireApplication;
 
@@ -19,9 +19,7 @@ import com.github.skjolber.desfire.ev1.model.DesfireApplication;
 
 // todo use Bundle instead of a constructor for parameter
 @SuppressLint("ValidFragment")
-public class FileNewFragment extends Fragment {
-
-
+public class FileNewFragmentOrg extends Fragment {
 
 	private EditText fileId;
 	private TextView logData;
@@ -32,7 +30,7 @@ public class FileNewFragment extends Fragment {
 
 	// todo use Bundle instead of a constructor for parameter
 	@SuppressLint("ValidFragment")
-	public FileNewFragment(DesfireApplication application) {
+	public FileNewFragmentOrg(DesfireApplication application) {
 		this.application = application;
 	}
 
@@ -66,6 +64,16 @@ public class FileNewFragment extends Fragment {
 
 
         return view;
+    }
+
+	@Override
+	public void onActivityCreated(Bundle savedInstanceState) {
+		super.onActivityCreated(savedInstanceState);
+	}
+
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+
     }
 
 	public void setOnClickListener(View.OnClickListener listener) {

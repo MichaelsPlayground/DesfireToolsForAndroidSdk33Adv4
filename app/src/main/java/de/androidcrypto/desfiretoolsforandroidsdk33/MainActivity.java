@@ -15,7 +15,6 @@ import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Fragment;
 import android.app.FragmentManager;
-import android.app.FragmentTransaction;
 import android.content.BroadcastReceiver;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -40,6 +39,7 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentTransaction;
 
 import com.github.skjolber.desfire.ev1.model.DesfireApplication;
 import com.github.skjolber.desfire.ev1.model.DesfireApplicationId;
@@ -960,7 +960,8 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
 			}
 		});
 
-		FragmentTransaction transaction = getFragmentManager().beginTransaction();
+		//FragmentTransaction transaction = getFragmentManager().beginTransaction();
+		FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
 		// Replace whatever is in the fragment_container view with this fragment,
 		// and add the transaction to the back stack
 		transaction.replace(R.id.content, newFragment, "addFile");
@@ -1109,7 +1110,8 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
 	private void addKey() {
 		//KeyListFragment fragment = (KeyListFragment) getFragmentManager().findFragmentByTag("keys");
 		KeyListFragment fragment = (KeyListFragment) getSupportFragmentManager().findFragmentByTag("keys");
-		
+		//this.dataSource = MainApplication.getInstance().getDataSource();
+		fragment.setDataSource(MainApplication.getInstance().getDataSource());
 		fragment.showAddKey(null);
 
 	}
@@ -1125,7 +1127,8 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
 		                                                      R.string.fileSaveDialogSaveAs,
 		                                                      R.string.fileSaveDialogHintFilenameUnadorned,
 		                                                      android.R.drawable.ic_menu_save);
-		  fsf.show(getFragmentManager(), fragTag);	
+		  //fsf.show(getFragmentManager(), fragTag);
+		fsf.show(getSupportFragmentManager(), fragTag);
 		  
 		  this.callbacks = new FileCallbacks(); 
 	}
@@ -1136,6 +1139,7 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
 		// Create new fragment and transaction
 		final KeyListFragment newFragment = new KeyListFragment();
 		newFragment.setContext(this);
+		newFragment.setDataSource(MainApplication.getInstance().getDataSource());
 		
 		newFragment.setOnItemClickListener(new OnItemClickListener(){
 
@@ -1154,7 +1158,7 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
 					
 					//KeyListFragment fragment = (KeyListFragment) getFragmentManager().findFragmentByTag("keys");
 					KeyListFragment fragment = (KeyListFragment) getSupportFragmentManager().findFragmentByTag("keys");
-					
+					fragment.setDataSource(MainApplication.getInstance().getDataSource());
 					fragment.showAddKey(desfire);
 
 				}

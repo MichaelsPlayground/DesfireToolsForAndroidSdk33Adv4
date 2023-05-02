@@ -12,14 +12,11 @@ package de.androidcrypto.desfiretoolsforandroidsdk33;
 
 // submit@codeproject.com
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.app.Dialog;
+import android.app.DialogFragment;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Color;
@@ -39,13 +36,15 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import androidx.fragment.app.DialogFragment;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 
 /** Allow user to select destination directory and to enter filename.
  *
  * */
-public class FileSaveFragment extends DialogFragment
+public class FileSaveFragmentOrg extends DialogFragment
 		implements OnItemClickListener {
 
 	/*
@@ -157,13 +156,13 @@ public class FileSaveFragment extends DialogFragment
 	 * @param resourceID_EditHint - String resource ID for the filename edit widget.
 	 * @param resourceID_Icon - Drawable resource ID for the dialogue's title bar icon.
 	 * */
-    public static FileSaveFragment newInstance(String defaultExtension,
-    		                                   int resourceID_OK, 
-    		                                   int resourceID_Cancel, 
-    		                                   int resourceID_Title, 
-    		                                   int resourceID_EditHint,
-    		                                   int resourceID_Icon) {
-    	FileSaveFragment frag = new FileSaveFragment();
+    public static FileSaveFragmentOrg newInstance(String defaultExtension,
+                                                  int resourceID_OK,
+                                                  int resourceID_Cancel,
+                                                  int resourceID_Title,
+                                                  int resourceID_EditHint,
+                                                  int resourceID_Icon) {
+    	FileSaveFragmentOrg frag = new FileSaveFragmentOrg();
     	
     	Bundle args = new Bundle();
     	args.putString("extensionList", defaultExtension);
@@ -177,16 +176,11 @@ public class FileSaveFragment extends DialogFragment
     }
 
     /** Note the parent activity for callback purposes.
-     *  @param context - parent activity
+     *  @param activity - parent activity
      * */
 	@Override
-	//public void onAttach(Activity activity) {
-	// super.onAttach(activity);
-	public void onAttach(Context context) {
-			super.onAttach(context);
-
-		Activity activity = context instanceof Activity ? (Activity) context : null;
-
+	public void onAttach(Activity activity) {
+		super.onAttach(activity);
         // The containing activity is expected to implement the fragment's 
         // callbacks otherwise it can't react to item changes.
         if (!(activity instanceof Callbacks)) {
@@ -313,7 +307,7 @@ public class FileSaveFragment extends DialogFragment
 		// Use the standard AlertDialog builder to create the popup. 
 		//     Android custom and practice is normally to chain calls from the builder, but
 		//     it can become an unreadable and unmaintainable mess very quickly so I don't.
-		Builder popupBuilder = new AlertDialog.Builder(getActivity());
+		Builder popupBuilder = new Builder(getActivity());
 		popupBuilder.setView(root);
 		popupBuilder.setIcon(resourceID_Icon);
 		popupBuilder.setTitle(resourceID_Title);
