@@ -1,10 +1,8 @@
 package de.androidcrypto.desfiretoolsforandroidsdk33;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
+import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Fragment;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
@@ -12,11 +10,11 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ContextMenu.ContextMenuInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
@@ -25,121 +23,48 @@ import android.widget.ListView;
 import android.widget.RadioGroup;
 import android.widget.RadioGroup.OnCheckedChangeListener;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-
 import com.github.skjolber.desfire.ev1.model.command.Utils;
 import com.github.skjolber.desfire.ev1.model.key.DesfireKey;
 import com.github.skjolber.desfire.ev1.model.key.DesfireKeyType;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import de.androidcrypto.desfiretoolsforandroidsdk33.filelist.ApplicationDetail;
 import de.androidcrypto.desfiretoolsforandroidsdk33.filelist.ApplicationDetailKey;
 import de.androidcrypto.desfiretoolsforandroidsdk33.keys.DataSource;
 
-public class KeyListFragment extends Fragment {
+public class KeyListFragmentOrg extends Fragment {
 
-	// TODO: Rename parameter arguments, choose names that match
-	// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-	private static final String ARG_PARAM1 = "param1";
-	private static final String ARG_PARAM2 = "param2";
-
-	// TODO: Rename and change types of parameters
-	private String mParam1;
-	private String mParam2;
-
-	public KeyListFragment() {
-		// Required empty public constructor
-	}
-
-	/**
-	 * Use this factory method to create a new instance of
-	 * this fragment using the provided parameters.
-	 *
-	 * @param param1 Parameter 1.
-	 * @param param2 Parameter 2.
-	 * @return A new instance of fragment ReceiveFragment.
-	 */
-	// TODO: Rename and change types and number of parameters
-	public static KeyListFragment newInstance(String param1, String param2) {
-		KeyListFragment fragment = new KeyListFragment();
-		Bundle args = new Bundle();
-		args.putString(ARG_PARAM1, param1);
-		args.putString(ARG_PARAM2, param2);
-		fragment.setArguments(args);
-		return fragment;
-	}
-
-	private static final String TAG = KeyListFragment.class.getName();
+	private static final String TAG = KeyListFragmentOrg.class.getName();
 
 	private List<DesfireKey> keys;
-	
+
 	private ListView listView;
-	
+
 	private MainActivity context;
 
 	private DataSource dataSource;
-	
+
 	private OnItemClickListener listener;
-	
+
 	private KeyListItemAdapter adapter;
-	
+
 	private int checked = R.id.buttonAES;
 
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		if (getArguments() != null) {
-			mParam1 = getArguments().getString(ARG_PARAM1);
-			mParam2 = getArguments().getString(ARG_PARAM2);
-		}
-		//contextSave = getActivity().getApplicationContext();
-	}
-
-	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container,
-							 Bundle savedInstanceState) {
-		// Inflate the layout for this fragment
-		return inflater.inflate(R.layout.key_list, container, false);
-	}
-
-	@Override
-	public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-		super.onViewCreated(view, savedInstanceState);
-
-		listView = (ListView)view.findViewById(R.id.listView);
-		listView.setOnItemClickListener(listener);
-
-		populateList();
-	}
-
-	public void setDataSource(DataSource dataSource) {
-		this.dataSource = dataSource;
-	}
-
-// todo work on this - get dataSource
-	/*
-	public KeyListFragment() {
+	public KeyListFragmentOrg() {
 		this.dataSource = MainApplication.getInstance().getDataSource();
 	}
-
-	 */
-
-
-
 
     public void setContext(MainActivity context) {
         this.context = context;
     }
 
-	/*
     @Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 	}
-
-	 */
 	
 	@Override
 	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
@@ -147,7 +72,19 @@ public class KeyListFragment extends Fragment {
 		
 		menu.add(Menu.NONE, R.id.action_add, Menu.NONE, R.string.keyAdd);
 	}
+	
+	@Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+        View view = inflater.inflate(R.layout.key_list, container, false);
+        
+        listView = (ListView)view.findViewById(R.id.listView);
+        listView.setOnItemClickListener(listener);
 
+		populateList();
+                
+        return view;
+    }
 
 	private void populateList() {
 		List<ApplicationDetail> details = new ArrayList<ApplicationDetail>();
@@ -161,7 +98,15 @@ public class KeyListFragment extends Fragment {
 		
         listView.setAdapter(adapter);
 	}
-
+	
+	@Override
+	public void onActivityCreated(Bundle savedInstanceState) {
+		super.onActivityCreated(savedInstanceState);
+	}
+	
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+    }
 
 	public int getPx(int dp) {
 		float scale = getResources().getDisplayMetrics().density;
@@ -186,12 +131,13 @@ public class KeyListFragment extends Fragment {
 			value.setText(Utils.getHexString(existingKey.getValue(), true));
 			name.setText(existingKey.getName());
 		}
-
+		
+		
         RadioGroup radioGroup = (RadioGroup) message.findViewById(R.id.segmentedControlKeyType);        
         radioGroup.setOnCheckedChangeListener(new OnCheckedChangeListener() 
         {
             public void onCheckedChanged(RadioGroup group, int checkedId) {
-            	KeyListFragment.this.checked = checkedId;
+            	KeyListFragmentOrg.this.checked = checkedId;
             }
         });
         
@@ -221,6 +167,7 @@ public class KeyListFragment extends Fragment {
 
         }
 
+        
 		/*
 		if(key.getId() != -1L) {
 			name.setText(key.getName());

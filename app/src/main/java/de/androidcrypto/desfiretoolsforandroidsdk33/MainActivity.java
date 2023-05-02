@@ -659,7 +659,7 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
 
 		});
 		
-		FragmentTransaction transaction = getFragmentManager().beginTransaction();
+		androidx.fragment.app.FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
 
 		// Replace whatever is in the fragment_container view with this fragment,
 		// and add the transaction to the back stack
@@ -1107,7 +1107,8 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
 	}
 	
 	private void addKey() {
-		KeyListFragment fragment = (KeyListFragment) getFragmentManager().findFragmentByTag("keys");
+		//KeyListFragment fragment = (KeyListFragment) getFragmentManager().findFragmentByTag("keys");
+		KeyListFragment fragment = (KeyListFragment) getSupportFragmentManager().findFragmentByTag("keys");
 		
 		fragment.showAddKey(null);
 
@@ -1151,7 +1152,8 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
 					
 					Log.d(TAG, "Show details for key " + desfire);
 					
-					KeyListFragment fragment = (KeyListFragment) getFragmentManager().findFragmentByTag("keys");
+					//KeyListFragment fragment = (KeyListFragment) getFragmentManager().findFragmentByTag("keys");
+					KeyListFragment fragment = (KeyListFragment) getSupportFragmentManager().findFragmentByTag("keys");
 					
 					fragment.showAddKey(desfire);
 
@@ -1160,7 +1162,8 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
 			}
 			
 		});
-		FragmentTransaction transaction = getFragmentManager().beginTransaction();
+		//FragmentTransaction transaction = getFragmentManager().beginTransaction();
+		androidx.fragment.app.FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
 
 		// Replace whatever is in the fragment_container view with this fragment,
 		// and add the transaction to the back stack
