@@ -12,8 +12,8 @@ import java.util.List;
 import java.util.Map;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.BroadcastReceiver;
@@ -39,7 +39,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import androidx.fragment.app.Fragment;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.github.skjolber.desfire.ev1.model.DesfireApplication;
 import com.github.skjolber.desfire.ev1.model.DesfireApplicationId;
@@ -71,9 +71,13 @@ import de.androidcrypto.desfiretoolsforandroidsdk33.filelist.ApplicationDetailKe
 import de.androidcrypto.desfiretoolsforandroidsdk33.filelist.ApplicationDetailRecord;
 import de.androidcrypto.desfiretoolsforandroidsdk33.keys.DataSource;
 
+/**
+ * Note on DesfireToolsForAndroidSdk33Adv2
+ * This is the same code as on Adv1 but all fragments are substituted from old/deprecated Fragment to AndroidX Fragment
+ */
 
 @SuppressLint("ResourceAsColor")
-public class MainActivity extends Activity implements ReaderCallback, FragmentManager.OnBackStackChangedListener, FileSaveFragment.Callbacks {
+public class MainActivity extends AppCompatActivity implements ReaderCallback, FragmentManager.OnBackStackChangedListener, FileSaveFragment.Callbacks {
 
     private static final String ACTION_NFC_SETTINGS = "android.settings.NFC_SETTINGS";
     
@@ -255,14 +259,23 @@ public class MainActivity extends Activity implements ReaderCallback, FragmentMa
 		});		
 	}
 
+	/* new with AppCompatActivity
+		final ApplicationNewFragment newFragment = new ApplicationNewFragment();
+		Fragment fragment = new ApplicationNewFragment();
+		getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, selectedFragment).commit();
+		*/
+
 	private void showApplicationFragment(final List<DesfireApplication> applications) {
 		Log.d(TAG, "showApplicationFragment");
-		
-		FragmentManager fragmentManager = getFragmentManager();
-		
-		// Create new fragment and transaction
-		ApplicationListFragment newFragment = new ApplicationListFragment();
+
+		final ApplicationListFragment newFragment = new ApplicationListFragment();
 		newFragment.setApplications(applications);
+
+
+		//FragmentManager fragmentManager = getFragmentManager();
+		// Create new fragment and transaction
+		//ApplicationListFragment newFragment = new ApplicationListFragment();
+		//newFragment.setApplications(applications);
 		newFragment.setOnItemClickListener(new OnItemClickListener(){
 
 			@Override
@@ -426,9 +439,11 @@ public class MainActivity extends Activity implements ReaderCallback, FragmentMa
 			}
 			
 		});
-		
-		FragmentTransaction transaction = fragmentManager.beginTransaction();
 
+		getSupportFragmentManager().beginTransaction().replace(R.id.content, newFragment).commit();
+
+		/*
+		FragmentTransaction transaction = fragmentManager.beginTransaction();
 		// Replace whatever is in the fragment_container view with this fragment,
 		// and add the transaction to the back stack
 		transaction.replace(R.id.content, newFragment, "applications");
@@ -436,6 +451,7 @@ public class MainActivity extends Activity implements ReaderCallback, FragmentMa
 
 		// Commit the transaction
 		transaction.commit();
+		 */
 	}
 
 	protected void onTagLost() {
@@ -449,9 +465,22 @@ public class MainActivity extends Activity implements ReaderCallback, FragmentMa
 		
 		// Create new fragment and transaction
 		final MainFragment newFragment = new MainFragment();
-		
-		FragmentTransaction transaction = getFragmentManager().beginTransaction();
+		//getSupportFragmentManager().beginTransaction().replace(R.id.content, newFragment).commit();
 
+		androidx.fragment.app.FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+		// Replace whatever is in the fragment_container view with this fragment,
+		// and add the transaction to the back stack
+		//Fragment fragment = new ApplicationNewFragment();
+		transaction.replace(R.id.content, newFragment, "main");
+		transaction.addToBackStack("main");
+		// Commit the transaction
+		transaction.commit();
+
+
+
+		/*
+		final MainFragment newFragment = new MainFragment();
+		FragmentTransaction transaction = getFragmentManager().beginTransaction();
 		// Replace whatever is in the fragment_container view with this fragment,
 		// and add the transaction to the back stack
 		transaction.replace(R.id.content, newFragment, "main");
@@ -459,6 +488,7 @@ public class MainActivity extends Activity implements ReaderCallback, FragmentMa
 
 		// Commit the transaction
 		transaction.commit();
+		 */
 	}
 
 	private void showApplicationFragment() {
@@ -774,9 +804,13 @@ public class MainActivity extends Activity implements ReaderCallback, FragmentMa
 			}
 		});
 
-		FragmentTransaction transaction = getFragmentManager().beginTransaction();
+		//getSupportFragmentManager().beginTransaction().replace(R.id.content, newFragment).commit();
+		//FragmentTransaction transaction = getFragmentManager().beginTransaction();
+		androidx.fragment.app.FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+
 		// Replace whatever is in the fragment_container view with this fragment,
 		// and add the transaction to the back stack
+		//Fragment fragment = new ApplicationNewFragment();
 		transaction.replace(R.id.content, newFragment, "addApplication");
 		transaction.addToBackStack("addApplication");
 		// Commit the transaction
@@ -971,9 +1005,12 @@ public class MainActivity extends Activity implements ReaderCallback, FragmentMa
 		MenuItem addApplication = menu.findItem(R.id.action_add_app); // added
 		MenuItem addFile = menu.findItem(R.id.action_add_file); // added
 
-		FragmentManager fragmentManager = getFragmentManager();
+		//FragmentManager fragmentManager = getFragmentManager();
+		//String name = fragmentManager.getBackStackEntryAt(fragmentManager.getBackStackEntryCount() - 1).getName();
 
+		androidx.fragment.app.FragmentManager fragmentManager = getSupportFragmentManager();
 		String name = fragmentManager.getBackStackEntryAt(fragmentManager.getBackStackEntryCount() - 1).getName();
+
 		if(name != null && name.equals("keys")) {
 			keys.setVisible(false);
 			addKey.setVisible(true);
@@ -1351,7 +1388,7 @@ public class MainActivity extends Activity implements ReaderCallback, FragmentMa
 		// Create new fragment and transaction
 		final FileFragment newFragment = new FileFragment();
 		newFragment.setFile(file);
-		
+
 		newFragment.setOnItemClickListener(new OnItemClickListener(){
 
 			@Override
@@ -1371,15 +1408,26 @@ public class MainActivity extends Activity implements ReaderCallback, FragmentMa
 			}
 			
 		});
-		FragmentTransaction transaction = getFragmentManager().beginTransaction();
 
+/*
+		FragmentTransaction transaction = getFragmentManager().beginTransaction();
 		// Replace whatever is in the fragment_container view with this fragment,
 		// and add the transaction to the back stack
 		transaction.replace(R.id.content, newFragment, "file");
 		transaction.addToBackStack("file");
-
 		// Commit the transaction
-		transaction.commit();		
+		transaction.commit();
+*/
+		androidx.fragment.app.FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+
+		// Replace whatever is in the fragment_container view with this fragment,
+		// and add the transaction to the back stack
+		//Fragment fragment = new ApplicationNewFragment();
+		transaction.replace(R.id.content, newFragment, "file");
+		transaction.addToBackStack("file");
+		// Commit the transaction
+		transaction.commit();
+
 	}
 	
 	@Override
@@ -1408,7 +1456,8 @@ public class MainActivity extends Activity implements ReaderCallback, FragmentMa
 				return;
 			}
 
-			FileFragment fragment = (FileFragment) getFragmentManager().findFragmentByTag("file");
+			//FileFragment fragment = (FileFragment) getFragmentManager().findFragmentByTag("file");
+			FileFragment fragment = (FileFragment) getSupportFragmentManager().findFragmentByTag("file");
 			
 			DesfireFile file = fragment.getFile();
 			

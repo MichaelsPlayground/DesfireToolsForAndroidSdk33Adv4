@@ -1,8 +1,9 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
     <!--<style name="Base.Theme.NfcDesfireToolsForAndroid" parent="Theme.Material3.DayNight.NoActionBar"> -->
-    <style name="Base.Theme.NfcDesfireToolsForAndroid" parent="android:Theme.Holo.Light.DarkActionBar">
-        <!-- Customize your light theme here. -->
+    <!-- <style name="Base.Theme.NfcDesfireToolsForAndroid" parent="android:Theme.Holo.Light.DarkActionBar"> -->
+    <style name="Base.Theme.NfcDesfireToolsForAndroid" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+    <!-- Customize your light theme here. -->
         <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
     </style>
 
@@ -13,7 +14,8 @@
         by AppBaseTheme from res/values-vXX/styles.xml on newer devices.
     -->
     <!-- <style name="AppBaseTheme" parent="android:Theme.Light"> -->
-    <style name="AppBaseTheme" parent="android:Theme.Holo.Light.DarkActionBar">
+    <!-- <style name="AppBaseTheme" parent="android:Theme.Holo.Light.DarkActionBar"> -->
+    <style name="AppBaseTheme" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
         <!--
             Theme customizations available in newer API levels can go in
             res/values-vXX/styles.xml, while customizations related to
