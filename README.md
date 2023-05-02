@@ -62,6 +62,12 @@ See the example application.
 [libfreefare]:                          https://github.com/nfc-tools/libfreefare
 [nfcjlib]:                              https://github.com/Andrade/nfcjlib
 
+dependency in build.gradle (app):
+```plaintext
+https://github.com/Kaopiz/android-segmented-control
+ used for implementation 'info.hoang8f:android-segmented:1.0.6' 
+```
+
 ## Changes by MichaelsPlayground & AndroidCrypto
 
 1) de.androidcrypto.desfiretoolsforandroidsdk33.FileFragment.java: show content of StandardFile in hex and string representation
