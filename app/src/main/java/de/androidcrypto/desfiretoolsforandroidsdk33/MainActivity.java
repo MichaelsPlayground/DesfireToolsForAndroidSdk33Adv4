@@ -14,7 +14,7 @@ import java.util.Map;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Fragment;
-import android.app.FragmentManager;
+//import android.app.FragmentManager;
 import android.content.BroadcastReceiver;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -39,6 +39,7 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.github.skjolber.desfire.ev1.model.DesfireApplication;
@@ -122,7 +123,8 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		
-		getFragmentManager().addOnBackStackChangedListener(this);
+		//getFragmentManager().addOnBackStackChangedListener(this);
+		getSupportFragmentManager().addOnBackStackChangedListener(this);
 		
     	// Check for available NFC Adapter
     	PackageManager pm = getPackageManager();
@@ -169,7 +171,8 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
 	public void onTagDiscovered(Tag nfc) {
 		IsoDep isoDep = IsoDep.get(nfc);
 		
-		FragmentManager fragmentManager = getFragmentManager();
+		//FragmentManager fragmentManager = getFragmentManager();
+		FragmentManager fragmentManager = getSupportFragmentManager();
 		fragmentManager.popBackStack("main", 0);
 		
 		DefaultIsoDepWrapper isoDepWrapper = new DefaultIsoDepWrapper(isoDep);
@@ -234,7 +237,8 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
 
 	@Override
 	public void onBackPressed() {
-		FragmentManager fragmentManager = getFragmentManager();
+		//FragmentManager fragmentManager = getFragmentManager();
+		androidx.fragment.app.FragmentManager fragmentManager = getSupportFragmentManager();
 
 		int count = fragmentManager.getBackStackEntryCount();
 		Log.d(TAG, "onBackPressed " + count);
