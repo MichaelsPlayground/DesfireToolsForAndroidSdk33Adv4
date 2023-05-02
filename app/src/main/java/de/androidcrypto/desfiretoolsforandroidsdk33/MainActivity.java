@@ -445,7 +445,14 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
 			
 		});
 
-		getSupportFragmentManager().beginTransaction().replace(R.id.content, newFragment).commit();
+		androidx.fragment.app.FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+		// Replace whatever is in the fragment_container view with this fragment,
+		// and add the transaction to the back stack
+		//Fragment fragment = new ApplicationNewFragment();
+		transaction.replace(R.id.content, newFragment, "applications");
+		transaction.addToBackStack("applications");
+		// Commit the transaction
+		transaction.commit();
 
 		/*
 		FragmentTransaction transaction = fragmentManager.beginTransaction();
@@ -791,7 +798,9 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
 				//byte[] aid = new byte[]{(byte) 0x08, (byte) 0x08, (byte) 0x01};
 				DesfireApplicationId desfireApplicationId = new DesfireApplicationId(aidByte);
 				byte aidKeySettings = (byte) 0x0f;
+				//byte numberOfKeys = (byte) 0x03;
 				byte numberOfKeys = (byte) 0x03;
+
 				int result = -99;
 				try {
 					result = mifare_desfire_create_application_aes(tag, desfireApplicationId, aidKeySettings, numberOfKeys);
@@ -844,24 +853,60 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
 			public void onClick(View view) {
 				System.out.println("*** createFile pressed");
 
-				// sanity checks on AID
-				String inputFid = newFragment.getFid();
-				if (TextUtils.isEmpty(inputFid)) {
-					newFragment.setLogData("please enter a 2 hex character long string");
+				// get the data from FileNewFragment
+				// file number
+				com.shawnlin.numberpicker.NumberPicker pickerFid = newFragment.getNpFileId();
+				int fid = pickerFid.getValue();
+				byte fileNumber = (byte) (fid & 0xff);
+
+				// communication settings
+				AutoCompleteTextView communicationSettingsSpinner = newFragment.getChoiceCommunicationSettings();
+				String comChoice = communicationSettingsSpinner.getText().toString();
+				byte commSett = (byte) 0x03;
+				if (comChoice.equals("Plain")) {
+					commSett = (byte) 0x00;
+				} else if (comChoice.equals("MACed")) {
+					commSett = (byte) 0x01;
+				} else if (comChoice.equals("Encrypted")) {
+					 commSett = (byte) 0x03;
+				} else {
+					newFragment.setLogData("unsupported communication setting");
 					return;
 				}
-				if (inputFid.length() != 2) {
-					newFragment.setLogData("please enter a 2 hex character long string");
+
+				// access rights
+				int nrOfKeysInApplication = newFragment.getNrOfApplicationKeys();
+				int keyForRw = newFragment.getNpKeyRw().getValue();
+				int keyForCar = newFragment.getNpKeyCar().getValue();
+				int keyForR = newFragment.getNpKeyR().getValue();
+				int keyForW = newFragment.getNpKeyW().getValue();
+				// sanity checks on key number
+				// todo special handling for key numbers 14 = free access rights without key and 15 = no rights necessary
+				if (keyForRw >= nrOfKeysInApplication) {
+					newFragment.setLogData("key for RW is too large, maximum is " + (nrOfKeysInApplication - 1)); // as they are numbered from 00 to 15
 					return;
 				}
-				byte[] fidByte;
-				fidByte = Utils.hexStringToByteArray(inputFid);
-				if (fidByte == null) {
-					newFragment.setLogData("please enter a 2 hex character long string");
+				if (keyForCar >= nrOfKeysInApplication) {
+					newFragment.setLogData("key for CAR is too large, maximum is " + (nrOfKeysInApplication - 1)); // as they are numbered from 00 to 15
 					return;
 				}
-				System.out.println("fidByte: " + Utils.getHexString(fidByte));
-				// com.github.skjolber.desfire.libfreefare.MifareDesfire.java
+				if (keyForR >= nrOfKeysInApplication) {
+					newFragment.setLogData("key for Read is too large, maximum is " + (nrOfKeysInApplication - 1)); // as they are numbered from 00 to 15
+					return;
+				}
+				if (keyForW >= nrOfKeysInApplication) {
+					newFragment.setLogData("key for Write is too large, maximum is " + (nrOfKeysInApplication - 1)); // as they are numbered from 00 to 15
+					return;
+				}
+				// get the new value
+				int accessRights = (keyForRw * 4096) + (keyForCar * 256) + (keyForR * 16) + (keyForW * 1);
+
+				// fileSize
+				int fileSize = Integer.parseInt(newFragment.getFileSize().getText().toString());
+				if ((fileSize < 1) || (fileSize > 256)) {
+					newFragment.setLogData("fileSize has to be in range of 1 to 256");
+					return;
+				}
 
 				// select application
 				//public static int mifare_desfire_select_application (MifareTag tag, DesfireApplicationId aid) throws Exception
@@ -941,25 +986,25 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
 
 				// mifare_desfire_create_std_data_file (MifareTag tag, byte file_no, byte communication_settings, int access_rights, int file_size) throws Exception
 
-				byte fileNumber = (byte) 0x03;
-				byte communicationSettings = (byte) 0x03;
+
+				//byte communicationSettings = (byte) 0x03;
 				/*
 				if (communicationSetting == CommunicationSetting.Plain) communicationSettings = (byte) 0x00;
         		if (communicationSetting == CommunicationSetting.MACed) communicationSettings = (byte) 0x01;
         		if (communicationSetting == CommunicationSetting.Encrypted) communicationSettings = (byte) 0x03;
 				 */
-				int accessRights = 18; // 0x00 0x12 = Read&Write Access & ChangeAccessRights | Read Access & Write Access
-				int fileSize = 32;
+				//int accessRights = 18; // 0x00 0x12 = Read&Write Access & ChangeAccessRights | Read Access & Write Access
+
 				int result = -99;
 				try {
-					result = mifare_desfire_create_std_data_file(tag, fileNumber, communicationSettings, accessRights, fileSize);
+					result = mifare_desfire_create_std_data_file(tag, fileNumber, commSett, accessRights, fileSize);
 				} catch (Exception e) {
 					//throw new RuntimeException(e);
 					newFragment.setLogData("createFile error: " + e.getMessage());
 					return;
 				}
 				if (result == 0) {
-					newFragment.setLogData("createFil success");
+					newFragment.setLogData("createFile success");
 				} else {
 					newFragment.setLogData("createFile failure: " + result);
 					return;

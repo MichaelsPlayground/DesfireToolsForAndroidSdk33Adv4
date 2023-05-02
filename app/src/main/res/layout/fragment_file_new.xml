@@ -1,8 +1,8 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    xmlns:tools="http://schemas.android.com/tools"
 
     android:background="@color/white"
     android:orientation="vertical"
@@ -17,268 +17,371 @@
         android:text="@string/fileNew"
         android:textSize="30sp" />
 
-    <EditText
-        android:id="@+id/etFileId"
+    <com.google.android.material.divider.MaterialDivider
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="8dp"
-        android:ems="10"
-        android:inputType="text"
-        android:text="01" />
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        app:dividerInsetEnd="16dp"
+        app:dividerInsetStart="16dp"
+        app:dividerThickness="4dp" />
 
-    <LinearLayout
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="64dp"
-        android:orientation="horizontal">
+        android:layout_height="match_parent">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:text="@string/fileNewFileId"
-            android:textSize="20sp" />
-
-        <com.shawnlin.numberpicker.NumberPicker
-            android:id="@+id/npFileId"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:np_height="64dp"
-            app:np_max="15"
-            app:np_min="0"
-            app:np_orientation="horizontal"
-            app:np_selectedTextSize="20sp"
-            app:np_textSize="16sp"
-            app:np_value="3"
-            app:np_width="180dp" />
-
-    </LinearLayout>
-
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/spinner"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense.ExposedDropdownMenu"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="8dp"
-        >
-
-        <AutoCompleteTextView
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/spCommunicationSettings"
-            android:hint="choose the communication type"
-            android:inputType="none">
-        </AutoCompleteTextView>
-    </com.google.android.material.textfield.TextInputLayout>
+            android:layout_margin="16dp"
+            android:orientation="vertical">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="64dp"
-        android:orientation="horizontal">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="64dp"
+                android:orientation="horizontal">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:text="@string/fileNewKeyRw"
-            android:textSize="20sp" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:text="@string/fileNewFileId"
+                    android:textSize="20sp" />
 
-        <com.shawnlin.numberpicker.NumberPicker
-            android:id="@+id/npKeyRw"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:np_height="64dp"
-            app:np_max="15"
-            app:np_min="0"
-            app:np_orientation="horizontal"
-            app:np_selectedTextSize="20sp"
-            app:np_textSize="16sp"
-            app:np_value="0"
-            app:np_width="180dp" />
+                <com.shawnlin.numberpicker.NumberPicker
+                    android:id="@+id/npFileId"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:np_height="64dp"
+                    app:np_max="15"
+                    app:np_min="0"
+                    app:np_orientation="horizontal"
+                    app:np_selectedTextSize="20sp"
+                    app:np_textSize="16sp"
+                    app:np_value="0"
+                    app:np_width="180dp" />
 
-    </LinearLayout>
+            </LinearLayout>
 
-    <com.google.android.material.divider.MaterialDivider
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:dividerThickness="4dp"
-        app:dividerInsetEnd="16dp"
-        app:dividerInsetStart="16dp" />
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/spinner"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense.ExposedDropdownMenu"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="8dp">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="64dp"
-        android:orientation="horizontal">
+                <AutoCompleteTextView
+                    android:id="@+id/spCommunicationSettings"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="choose the communication type"
+                    android:inputType="none" />
+            </com.google.android.material.textfield.TextInputLayout>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:text="@string/fileNewKeyCar"
-            android:textSize="20sp" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="64dp"
+                android:orientation="horizontal">
 
-        <com.shawnlin.numberpicker.NumberPicker
-            android:id="@+id/npKeyCar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:np_height="64dp"
-            app:np_max="15"
-            app:np_min="0"
-            app:np_orientation="horizontal"
-            app:np_selectedTextSize="20sp"
-            app:np_textSize="16sp"
-            app:np_value="0"
-            app:np_width="180dp" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:text="@string/fileNewKeyRw"
+                    android:textSize="20sp" />
 
-    </LinearLayout>
+                <com.shawnlin.numberpicker.NumberPicker
+                    android:id="@+id/npKeyRw"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:np_height="64dp"
+                    app:np_max="15"
+                    app:np_min="0"
+                    app:np_orientation="horizontal"
+                    app:np_selectedTextSize="20sp"
+                    app:np_textSize="16sp"
+                    app:np_value="0"
+                    app:np_width="180dp" />
 
-    <com.google.android.material.divider.MaterialDivider
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:dividerThickness="4dp"
-        app:dividerInsetEnd="16dp"
-        app:dividerInsetStart="16dp" />
+            </LinearLayout>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="64dp"
-        android:orientation="horizontal">
+            <com.google.android.material.divider.MaterialDivider
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:dividerInsetEnd="16dp"
+                app:dividerInsetStart="16dp"
+                app:dividerThickness="4dp" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:text="@string/fileNewKeyR"
-            android:textSize="20sp" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="64dp"
+                android:orientation="horizontal">
 
-        <com.shawnlin.numberpicker.NumberPicker
-            android:id="@+id/npKeyR"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:np_height="64dp"
-            app:np_max="15"
-            app:np_min="0"
-            app:np_orientation="horizontal"
-            app:np_selectedTextSize="20sp"
-            app:np_textSize="16sp"
-            app:np_value="1"
-            app:np_width="180dp" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:text="@string/fileNewKeyCar"
+                    android:textSize="20sp" />
 
-    </LinearLayout>
+                <com.shawnlin.numberpicker.NumberPicker
+                    android:id="@+id/npKeyCar"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:np_height="64dp"
+                    app:np_max="15"
+                    app:np_min="0"
+                    app:np_orientation="horizontal"
+                    app:np_selectedTextSize="20sp"
+                    app:np_textSize="16sp"
+                    app:np_value="0"
+                    app:np_width="180dp" />
 
-    <com.google.android.material.divider.MaterialDivider
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:dividerThickness="4dp"
-        app:dividerInsetEnd="16dp"
-        app:dividerInsetStart="16dp" />
+            </LinearLayout>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="64dp"
-        android:orientation="horizontal">
+            <com.google.android.material.divider.MaterialDivider
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:dividerInsetEnd="16dp"
+                app:dividerInsetStart="16dp"
+                app:dividerThickness="4dp" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:text="@string/fileNewKeyW"
-            android:textSize="20sp" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="64dp"
+                android:orientation="horizontal">
 
-        <com.shawnlin.numberpicker.NumberPicker
-            android:id="@+id/npKeyW"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:np_height="64dp"
-            app:np_max="15"
-            app:np_min="0"
-            app:np_orientation="horizontal"
-            app:np_selectedTextSize="20sp"
-            app:np_textSize="16sp"
-            app:np_value="2"
-            app:np_width="180dp" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:text="@string/fileNewKeyR"
+                    android:textSize="20sp" />
 
-    </LinearLayout>
+                <com.shawnlin.numberpicker.NumberPicker
+                    android:id="@+id/npKeyR"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:np_height="64dp"
+                    app:np_max="15"
+                    app:np_min="0"
+                    app:np_orientation="horizontal"
+                    app:np_selectedTextSize="20sp"
+                    app:np_textSize="16sp"
+                    app:np_value="1"
+                    app:np_width="180dp" />
 
-    <com.google.android.material.divider.MaterialDivider
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:dividerThickness="4dp"
-        app:dividerInsetEnd="16dp"
-        app:dividerInsetStart="16dp" />
+            </LinearLayout>
 
-    <RadioGroup xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
+            <com.google.android.material.divider.MaterialDivider
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:dividerInsetEnd="16dp"
+                app:dividerInsetStart="16dp"
+                app:dividerThickness="4dp" />
 
-        <RadioButton
-            android:id="@+id/rbStandardFile"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:checked="true"
-            android:text="@string/rbStandardFile" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="64dp"
+                android:orientation="horizontal">
 
-        <RadioButton
-            android:id="@+id/rbValueFile"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/rbValueFile" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:text="@string/fileNewKeyW"
+                    android:textSize="20sp" />
 
-        <RadioButton
-            android:id="@+id/rbCyclicFile"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/rbCyclicFile" />
-    </RadioGroup>
+                <com.shawnlin.numberpicker.NumberPicker
+                    android:id="@+id/npKeyW"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:np_height="64dp"
+                    app:np_max="15"
+                    app:np_min="0"
+                    app:np_orientation="horizontal"
+                    app:np_selectedTextSize="20sp"
+                    app:np_textSize="16sp"
+                    app:np_value="2"
+                    app:np_width="180dp" />
 
-    <com.google.android.material.textfield.TextInputLayout
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-        android:id="@+id/etFileNewFileSizeLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="8dp"
-        android:hint="Size of file in bytes (maximum 256 bytes)"
-        app:boxCornerRadiusBottomEnd="5dp"
-        app:boxCornerRadiusBottomStart="5dp"
-        app:boxCornerRadiusTopEnd="5dp"
-        app:boxCornerRadiusTopStart="5dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+            </LinearLayout>
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/etFileNewFileSize"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:maxLines="1"
-            android:focusable="true"
-            android:text="32"
-            tools:ignore="KeyboardInaccessibleWidget" />
-    </com.google.android.material.textfield.TextInputLayout>
+            <com.google.android.material.divider.MaterialDivider
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:dividerInsetEnd="16dp"
+                app:dividerInsetStart="16dp"
+                app:dividerThickness="4dp" />
 
-    <Button
-        android:id="@+id/btnCreateFile"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="8dp"
-        android:text="create file" />
+            <RadioGroup xmlns:android="http://schemas.android.com/apk/res/android"
+                android:id="@+id/rgFileType"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/tvLog"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="8dp"
-        android:text="The log will appear here" />
+                <RadioButton
+                    android:id="@+id/rbStandardFile"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="true"
+                    android:text="@string/rbStandardFile" />
+
+                <RadioButton
+                    android:id="@+id/rbValueFile"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/rbValueFile" />
+
+                <RadioButton
+                    android:id="@+id/rbCyclicFile"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/rbCyclicFile" />
+            </RadioGroup>
+
+            <LinearLayout
+                android:id="@+id/llFileNewStandardLinearLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/etFileNewStandardFileSizeLayout"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginEnd="8dp"
+                    android:hint="Size of file in bytes (maximum 256 bytes)"
+                    app:boxCornerRadiusBottomEnd="5dp"
+                    app:boxCornerRadiusBottomStart="5dp"
+                    app:boxCornerRadiusTopEnd="5dp"
+                    app:boxCornerRadiusTopStart="5dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etFileNewStandardFileSize"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:ellipsize="end"
+                        android:focusable="true"
+                        android:inputType="number"
+                        android:maxLines="1"
+                        android:text="32"
+                        tools:ignore="KeyboardInaccessibleWidget" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+            </LinearLayout>
+
+
+            <LinearLayout
+                android:id="@+id/llFileNewValueLinearLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/etFileNewValueFileSizeLayout"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginEnd="8dp"
+                    android:hint="Size of file in bytes (maximum 256 bytes)"
+                    app:boxCornerRadiusBottomEnd="5dp"
+                    app:boxCornerRadiusBottomStart="5dp"
+                    app:boxCornerRadiusTopEnd="5dp"
+                    app:boxCornerRadiusTopStart="5dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etFileNewValueFileSize"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:ellipsize="end"
+                        android:focusable="true"
+                        android:inputType="number"
+                        android:maxLines="1"
+                        android:text="32"
+                        tools:ignore="KeyboardInaccessibleWidget" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/llFileNewRecordLinearLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/etFileNewRecordSizeLayout"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginEnd="8dp"
+                    android:hint="Size of record in bytes (maximum 256 bytes)"
+                    app:boxCornerRadiusBottomEnd="5dp"
+                    app:boxCornerRadiusBottomStart="5dp"
+                    app:boxCornerRadiusTopEnd="5dp"
+                    app:boxCornerRadiusTopStart="5dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etFileNewRecordFileSize"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:ellipsize="end"
+                        android:focusable="true"
+                        android:inputType="number"
+                        android:maxLines="1"
+                        android:text="32"
+                        tools:ignore="KeyboardInaccessibleWidget" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/btnCreateFile"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="8dp"
+                android:text="create file" />
+
+            <TextView
+                android:id="@+id/tvLog"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="8dp"
+                android:text="The log will appear here" />
+
+            <com.google.android.material.divider.MaterialDivider
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="20dp"
+                app:dividerInsetEnd="16dp"
+                app:dividerInsetStart="16dp"
+                app:dividerThickness="4dp" />
+
+        </LinearLayout>
+    </ScrollView>
 
 </LinearLayout>
