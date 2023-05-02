@@ -141,5 +141,6 @@
     <string name="rbStandardFile">create a standard file</string>
     <string name="rbValueFile">create a value file</string>
     <string name="rbCyclicFile">create a cyclic record file</string>
+    <string name="fileNewFileId">File ID:</string>
 
 </resources>

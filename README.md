@@ -62,10 +62,14 @@ See the example application.
 [libfreefare]:                          https://github.com/nfc-tools/libfreefare
 [nfcjlib]:                              https://github.com/Andrade/nfcjlib
 
-dependency in build.gradle (app):
+NumberPicker https://github.com/ShawnLin013/NumberPicker
+
+dependencies in build.gradle (app):
 ```plaintext
 https://github.com/Kaopiz/android-segmented-control
  used for implementation 'info.hoang8f:android-segmented:1.0.6' 
+ 
+https://github.com/ShawnLin013/NumberPicker for the numberPicker (included in source code), MIT license
 ```
 
 ## Changes by MichaelsPlayground & AndroidCrypto

@@ -5,11 +5,8 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.NumberPicker;
 import android.widget.TextView;
 
 import androidx.fragment.app.Fragment;
@@ -22,12 +19,11 @@ import com.github.skjolber.desfire.ev1.model.DesfireApplication;
 
 // todo use Bundle instead of a constructor for parameter
 @SuppressLint("ValidFragment")
-public class FileNewFragment extends Fragment {
+public class FileNewFragmentV1 extends Fragment {
 
 
-	private com.shawnlin.numberpicker.NumberPicker npFileId;
+
 	private EditText fileId;
-	private AutoCompleteTextView choiceCommunicationSettings;
 	private TextView logData;
 	private Button createFile;
 	private DesfireApplication application;
@@ -36,7 +32,7 @@ public class FileNewFragment extends Fragment {
 
 	// todo use Bundle instead of a constructor for parameter
 	@SuppressLint("ValidFragment")
-	public FileNewFragment(DesfireApplication application) {
+	public FileNewFragmentV1(DesfireApplication application) {
 		this.application = application;
 	}
 
@@ -51,24 +47,11 @@ public class FileNewFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_file_new, container, false);
 
-		npFileId = view.findViewById(R.id.npFileId);
 		fileId = view.findViewById(R.id.etFileId);
 		logData = view.findViewById(R.id.tvLog);
 		createFile = view.findViewById(R.id.btnCreateFile);
 
 		logData.setText("Create file for applicationID " + application.getIdString());
-
-		String[] type = new String[]{"Plain",
-				"MACed",
-				"Encrypted",
-		};
-		ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(
-				getContext(),
-				R.layout.drop_down_item,
-				type);
-		choiceCommunicationSettings = view.findViewById(R.id.spCommunicationSettings);
-		choiceCommunicationSettings.setAdapter(arrayAdapter);
-		choiceCommunicationSettings.setPos
 
 		createFile.setOnClickListener(listener);
 		/*

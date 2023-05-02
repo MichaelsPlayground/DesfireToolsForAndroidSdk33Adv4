@@ -35,6 +35,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -933,6 +934,19 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
 					Log.d(TAG, "Can't create an application");
 				}
 */
+
+				AutoCompleteTextView chooseCommunicationSettings;
+				String choiceString;
+				String[] type = new String[]{"Plain",
+						"MACed",
+						"Encrypted",
+				};
+				ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(
+						MainActivity.this,
+						R.layout.drop_down_item,
+						type);
+				chooseCommunicationSettings = findViewById(R.id.spCommunicationSettings);
+				chooseCommunicationSettings.setAdapter(arrayAdapter);
 				// line 628
 				// public static int
 
