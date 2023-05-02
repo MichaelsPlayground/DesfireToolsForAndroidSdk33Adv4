@@ -142,5 +142,9 @@
     <string name="rbValueFile">create a value file</string>
     <string name="rbCyclicFile">create a cyclic record file</string>
     <string name="fileNewFileId">File ID:</string>
+    <string name="fileNewKeyRw">RW key</string>
+    <string name="fileNewKeyCar">CAR key</string>
+    <string name="fileNewKeyR">Read key</string>
+    <string name="fileNewKeyW">Write key</string>
 
 </resources>

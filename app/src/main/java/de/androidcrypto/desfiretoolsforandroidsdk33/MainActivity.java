@@ -935,18 +935,7 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
 				}
 */
 
-				AutoCompleteTextView chooseCommunicationSettings;
-				String choiceString;
-				String[] type = new String[]{"Plain",
-						"MACed",
-						"Encrypted",
-				};
-				ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(
-						MainActivity.this,
-						R.layout.drop_down_item,
-						type);
-				chooseCommunicationSettings = findViewById(R.id.spCommunicationSettings);
-				chooseCommunicationSettings.setAdapter(arrayAdapter);
+
 				// line 628
 				// public static int
 

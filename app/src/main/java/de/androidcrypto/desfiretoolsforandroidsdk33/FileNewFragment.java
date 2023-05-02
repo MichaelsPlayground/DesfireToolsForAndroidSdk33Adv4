@@ -9,12 +9,12 @@ import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.NumberPicker;
 import android.widget.TextView;
 
 import androidx.fragment.app.Fragment;
 
 import com.github.skjolber.desfire.ev1.model.DesfireApplication;
+import com.shawnlin.numberpicker.NumberPicker;
 
 /**
  * class added by MichaelsPlayground / AndroidCrypto
@@ -68,7 +68,6 @@ public class FileNewFragment extends Fragment {
 				type);
 		choiceCommunicationSettings = view.findViewById(R.id.spCommunicationSettings);
 		choiceCommunicationSettings.setAdapter(arrayAdapter);
-		choiceCommunicationSettings.setPos
 
 		createFile.setOnClickListener(listener);
 		/*
@@ -96,5 +95,13 @@ public class FileNewFragment extends Fragment {
 
 	public DesfireApplication getApplication() {
 		return application;
+	}
+
+	public NumberPicker getNpFileId() {
+		return npFileId;
+	}
+
+	public AutoCompleteTextView getChoiceCommunicationSettings() {
+		return choiceCommunicationSettings;
 	}
 }

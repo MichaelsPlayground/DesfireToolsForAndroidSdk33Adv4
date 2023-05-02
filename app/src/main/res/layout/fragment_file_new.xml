@@ -2,6 +2,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
+    xmlns:tools="http://schemas.android.com/tools"
 
     android:background="@color/white"
     android:orientation="vertical"
@@ -73,6 +74,142 @@
         </AutoCompleteTextView>
     </com.google.android.material.textfield.TextInputLayout>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="@string/fileNewKeyRw"
+            android:textSize="20sp" />
+
+        <com.shawnlin.numberpicker.NumberPicker
+            android:id="@+id/npKeyRw"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:np_height="64dp"
+            app:np_max="15"
+            app:np_min="0"
+            app:np_orientation="horizontal"
+            app:np_selectedTextSize="20sp"
+            app:np_textSize="16sp"
+            app:np_value="0"
+            app:np_width="180dp" />
+
+    </LinearLayout>
+
+    <com.google.android.material.divider.MaterialDivider
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:dividerThickness="4dp"
+        app:dividerInsetEnd="16dp"
+        app:dividerInsetStart="16dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="@string/fileNewKeyCar"
+            android:textSize="20sp" />
+
+        <com.shawnlin.numberpicker.NumberPicker
+            android:id="@+id/npKeyCar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:np_height="64dp"
+            app:np_max="15"
+            app:np_min="0"
+            app:np_orientation="horizontal"
+            app:np_selectedTextSize="20sp"
+            app:np_textSize="16sp"
+            app:np_value="0"
+            app:np_width="180dp" />
+
+    </LinearLayout>
+
+    <com.google.android.material.divider.MaterialDivider
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:dividerThickness="4dp"
+        app:dividerInsetEnd="16dp"
+        app:dividerInsetStart="16dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="@string/fileNewKeyR"
+            android:textSize="20sp" />
+
+        <com.shawnlin.numberpicker.NumberPicker
+            android:id="@+id/npKeyR"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:np_height="64dp"
+            app:np_max="15"
+            app:np_min="0"
+            app:np_orientation="horizontal"
+            app:np_selectedTextSize="20sp"
+            app:np_textSize="16sp"
+            app:np_value="1"
+            app:np_width="180dp" />
+
+    </LinearLayout>
+
+    <com.google.android.material.divider.MaterialDivider
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:dividerThickness="4dp"
+        app:dividerInsetEnd="16dp"
+        app:dividerInsetStart="16dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="@string/fileNewKeyW"
+            android:textSize="20sp" />
+
+        <com.shawnlin.numberpicker.NumberPicker
+            android:id="@+id/npKeyW"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:np_height="64dp"
+            app:np_max="15"
+            app:np_min="0"
+            app:np_orientation="horizontal"
+            app:np_selectedTextSize="20sp"
+            app:np_textSize="16sp"
+            app:np_value="2"
+            app:np_width="180dp" />
+
+    </LinearLayout>
+
+    <com.google.android.material.divider.MaterialDivider
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:dividerThickness="4dp"
+        app:dividerInsetEnd="16dp"
+        app:dividerInsetStart="16dp" />
+
     <RadioGroup xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -97,6 +234,34 @@
             android:layout_height="wrap_content"
             android:text="@string/rbCyclicFile" />
     </RadioGroup>
+
+    <com.google.android.material.textfield.TextInputLayout
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:id="@+id/etFileNewFileSizeLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="8dp"
+        android:hint="Size of file in bytes (maximum 256 bytes)"
+        app:boxCornerRadiusBottomEnd="5dp"
+        app:boxCornerRadiusBottomStart="5dp"
+        app:boxCornerRadiusTopEnd="5dp"
+        app:boxCornerRadiusTopStart="5dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etFileNewFileSize"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:focusable="true"
+            android:text="32"
+            tools:ignore="KeyboardInaccessibleWidget" />
+    </com.google.android.material.textfield.TextInputLayout>
 
     <Button
         android:id="@+id/btnCreateFile"
