@@ -146,5 +146,10 @@
     <string name="fileNewKeyCar">CAR key</string>
     <string name="fileNewKeyR">Read key</string>
     <string name="fileNewKeyW">Write key</string>
+    <string name="fileNewNumberOfRecords">max. records</string>
+    <string name="fileNewKeyInformation">Note: key 14 (free acess without key) and 15 (no access) is not supported at this time</string>
+    <string name="rbRecordFile">create a record file</string>
+    <string name="fileNewValueLimitedCreditInformation">Note: The Limited credit feature is disabled and not supported at this time</string>
+    <string name="fileNewApplicationId">Application Identifier (AID):</string>
 
 </resources>

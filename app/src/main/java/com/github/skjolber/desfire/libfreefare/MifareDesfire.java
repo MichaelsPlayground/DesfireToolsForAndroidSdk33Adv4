@@ -1402,8 +1402,10 @@ public class MifareDesfire {
 	}
 
 	public static int
-	create_file2 (MifareTag tag, byte command, byte file_no, boolean has_iso_file_id, short iso_file_id, byte communication_settings, short access_rights, int record_size, int max_number_of_records) throws Exception
+	create_file2_new (MifareTag tag, byte command, byte file_no, boolean has_iso_file_id, short iso_file_id, byte communication_settings, int access_rights, int record_size, int max_number_of_records) throws Exception
 	{
+		// todo the original create_file2 method seems to use wrong lengths, this is the corrected one
+		// second change: it uses an int for access rights instead of short
 	    ASSERT_ACTIVE (tag);
 	    ASSERT_MIFARE_DESFIRE (tag);
 
@@ -1416,8 +1418,8 @@ public class MifareDesfire {
 		C.BUFFER_APPEND_LE (cmd, C.getBytes2(iso_file_id), 2, 2);
 	    C.BUFFER_APPEND (cmd, communication_settings);
 	    C.BUFFER_APPEND_LE (cmd, C.getBytes2(access_rights), 2, 2);
-	    C.BUFFER_APPEND_LE (cmd, C.getBytes4(record_size), 3, 4);
-	    C.BUFFER_APPEND_LE (cmd, C.getBytes4(max_number_of_records), 3, 4);
+	    C.BUFFER_APPEND_LE (cmd, C.getBytes3(record_size), 3, 3); // changed to field size is 3
+	    C.BUFFER_APPEND_LE (cmd, C.getBytes3(max_number_of_records), 3, 3); // changed to field size is 3
 
 	    byte[] p = MifareDesfireCrypto.mifare_cryto_preprocess_data (tag, cmd, cmd.position(), 0, MifareDesfireCrypto.MDCM_PLAIN | MifareDesfireCrypto.CMAC_COMMAND);
 
@@ -1438,27 +1440,98 @@ public class MifareDesfire {
 	}
 
 	public static int
-	mifare_desfire_create_linear_record_file (MifareTag tag, byte file_no, byte communication_settings, short access_rights, int record_size, int max_number_of_records) throws Exception
+	create_file2_original (MifareTag tag, byte command, byte file_no, boolean has_iso_file_id, short iso_file_id, byte communication_settings, short access_rights, int record_size, int max_number_of_records) throws Exception
 	{
-	    return create_file2 (tag, (byte)0xC1, file_no, false, (short)0x0000, communication_settings, access_rights, record_size, max_number_of_records);
+		// todo the original create_file2 method seems to use wrong lengths
+		ASSERT_ACTIVE (tag);
+		ASSERT_MIFARE_DESFIRE (tag);
+
+		ByteBuffer cmd = C.BUFFER_INIT (11 + CMAC_LENGTH);
+
+		C.BUFFER_APPEND (cmd, command);
+		C.BUFFER_APPEND (cmd, file_no);
+		if (has_iso_file_id)
+
+			C.BUFFER_APPEND_LE (cmd, C.getBytes2(iso_file_id), 2, 2);
+		C.BUFFER_APPEND (cmd, communication_settings);
+		C.BUFFER_APPEND_LE (cmd, C.getBytes2(access_rights), 2, 2);
+		C.BUFFER_APPEND_LE (cmd, C.getBytes4(record_size), 3, 4); // this might be wrong, field size is 3 ?
+		C.BUFFER_APPEND_LE (cmd, C.getBytes4(max_number_of_records), 3, 4); // this might be wrong, field size is 3 ?
+
+		byte[] p = MifareDesfireCrypto.mifare_cryto_preprocess_data (tag, cmd, cmd.position(), 0, MifareDesfireCrypto.MDCM_PLAIN | MifareDesfireCrypto.CMAC_COMMAND);
+
+		byte[] res = DESFIRE_TRANSCEIVE2(tag, p);
+
+		byte[] buffer = new byte[1 + CMAC_LENGTH];
+		System.arraycopy(res, 0, buffer, 0, res.length);
+
+		p = MifareDesfireCrypto.mifare_cryto_postprocess_data (tag, buffer, res.length, MifareDesfireCrypto.MDCM_PLAIN | MifareDesfireCrypto.CMAC_COMMAND | MifareDesfireCrypto.CMAC_VERIFY);
+
+		if (p == null) {
+			return -1;
+		}
+
+		cached_file_settings[file_no] = null;
+
+		return 0;
+	}
+
+	/**
+	 * This are the changed methods working with create_file_new that uses corrected length information for record size and maximum number of records
+	 * Second change: it uses the int value for access rights instead of short same to standard file
+	 */
+
+
+	public static int
+	mifare_desfire_create_linear_record_file (MifareTag tag, byte file_no, byte communication_settings, int access_rights, int record_size, int max_number_of_records) throws Exception
+	{
+	    return create_file2_new (tag, (byte)0xC1, file_no, false, (short)0x0000, communication_settings, access_rights, record_size, max_number_of_records);
 	}
 
 	public static int
-	mifare_desfire_create_linear_record_file_iso (MifareTag tag, byte file_no, byte communication_settings, short access_rights, int record_size, int max_number_of_records, short iso_file_id) throws Exception
+	mifare_desfire_create_linear_record_file_iso (MifareTag tag, byte file_no, byte communication_settings, int access_rights, int record_size, int max_number_of_records, short iso_file_id) throws Exception
 	{
-	    return create_file2 (tag, (byte)0xC1, file_no, true, iso_file_id, communication_settings, access_rights, record_size, max_number_of_records);
+	    return create_file2_new (tag, (byte)0xC1, file_no, true, iso_file_id, communication_settings, access_rights, record_size, max_number_of_records);
 	}
 
 	public static int
-	mifare_desfire_create_cyclic_record_file (MifareTag tag, byte file_no, byte communication_settings, short access_rights, int record_size, int max_number_of_records) throws Exception
+	mifare_desfire_create_cyclic_record_file (MifareTag tag, byte file_no, byte communication_settings, int access_rights, int record_size, int max_number_of_records) throws Exception
 	{
-	    return create_file2 (tag, (byte)0xC0, file_no, false, (short)0x000, communication_settings, access_rights, record_size, max_number_of_records);
+	    return create_file2_new (tag, (byte)0xC0, file_no, false, (short)0x000, communication_settings, access_rights, record_size, max_number_of_records);
 	}
 
 	public static int
-	mifare_desfire_create_cyclic_record_file_iso (MifareTag tag, byte file_no, byte communication_settings, short access_rights, int record_size, int max_number_of_records, short iso_file_id) throws Exception
+	mifare_desfire_create_cyclic_record_file_iso (MifareTag tag, byte file_no, byte communication_settings, int access_rights, int record_size, int max_number_of_records, short iso_file_id) throws Exception
 	{
-	    return create_file2 (tag, (byte)0xC0, file_no, true, iso_file_id, communication_settings, access_rights, record_size, max_number_of_records);
+	    return create_file2_new (tag, (byte)0xC0, file_no, true, iso_file_id, communication_settings, access_rights, record_size, max_number_of_records);
+	}
+
+	/**
+	 * Note the create_file2 method seems to be wrongs (wrong length) so I copied the original ones to this block
+	 */
+
+	public static int
+	mifare_desfire_create_linear_record_file_original (MifareTag tag, byte file_no, byte communication_settings, short access_rights, int record_size, int max_number_of_records) throws Exception
+	{
+		return create_file2_original (tag, (byte)0xC1, file_no, false, (short)0x0000, communication_settings, access_rights, record_size, max_number_of_records);
+	}
+
+	public static int
+	mifare_desfire_create_linear_record_file_iso_original (MifareTag tag, byte file_no, byte communication_settings, short access_rights, int record_size, int max_number_of_records, short iso_file_id) throws Exception
+	{
+		return create_file2_original (tag, (byte)0xC1, file_no, true, iso_file_id, communication_settings, access_rights, record_size, max_number_of_records);
+	}
+
+	public static int
+	mifare_desfire_create_cyclic_record_file_original (MifareTag tag, byte file_no, byte communication_settings, short access_rights, int record_size, int max_number_of_records) throws Exception
+	{
+		return create_file2_original (tag, (byte)0xC0, file_no, false, (short)0x000, communication_settings, access_rights, record_size, max_number_of_records);
+	}
+
+	public static int
+	mifare_desfire_create_cyclic_record_file_iso_original (MifareTag tag, byte file_no, byte communication_settings, short access_rights, int record_size, int max_number_of_records, short iso_file_id) throws Exception
+	{
+		return create_file2_original (tag, (byte)0xC0, file_no, true, iso_file_id, communication_settings, access_rights, record_size, max_number_of_records);
 	}
 
 	public static int

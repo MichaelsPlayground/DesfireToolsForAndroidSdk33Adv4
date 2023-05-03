@@ -899,12 +899,45 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
 					return;
 				}
 				// get the new value
-				int accessRights = (keyForRw * 4096) + (keyForCar * 256) + (keyForR * 16) + (keyForW * 1);
+				//int accessRights = (keyForRw * 4096) + (keyForCar * 256) + (keyForR * 16) + (keyForW * 1);
+				int accessRights = (keyForR * 4096) + (keyForW * 256) + (keyForRw * 16) + (keyForCar * 1);
 
-				// fileSize
-				int fileSize = Integer.parseInt(newFragment.getFileSize().getText().toString());
-				if ((fileSize < 1) || (fileSize > 256)) {
+				// standard fileSize
+				int standardFileSize = Integer.parseInt(newFragment.getStandardFileSize().getText().toString());
+				if ((standardFileSize < 1) || (standardFileSize > 256)) {
 					newFragment.setLogData("fileSize has to be in range of 1 to 256");
+					return;
+				}
+
+				// record fileSize
+				int recordFileSize = Integer.parseInt(newFragment.getRecordFileSize().getText().toString());
+				if ((recordFileSize < 1) || (recordFileSize > 256)) {
+					newFragment.setLogData("fileSize has to be in range of 1 to 256");
+					return;
+				}
+
+				// number of records
+				int numberOfRecords = newFragment.getNpNrOfRecords().getValue();
+				if ((numberOfRecords < 1) || (numberOfRecords > 10)) {
+					newFragment.setLogData("number of records has to be in range of 1 to 10");
+					return;
+				}
+
+				// value file parameters
+				// lower limit
+				int lowerLimit = newFragment.getLowerLimit();
+				// upper limit
+				int upperLimit = newFragment.getUpperLimit();
+				// lower limit
+				int value = newFragment.getValue();
+				if(lowerLimit >= upperLimit ) {
+					newFragment.setLogData("the upper limit has to be higher than the lower limit");
+					return;
+				}
+				if ((value >= lowerLimit) && (value <= upperLimit)) {
+					// everything is ok, value is in range lower limit <= value <= upper limit
+				} else {
+					newFragment.setLogData("the value has to be in range of lower limit to upper limit");
 					return;
 				}
 
@@ -995,9 +1028,38 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
 				 */
 				//int accessRights = 18; // 0x00 0x12 = Read&Write Access & ChangeAccessRights | Read Access & Write Access
 
+
+				// for value file
+				//mifare_desfire_create_value_file (MifareTag tag, byte file_no, byte communication_settings, short access_rights,
+				// int lower_limit, int upper_limit, int value, byte limited_credit_enable) throws Exception
+
+				// for cyclic file:
+				// mifare_desfire_create_cyclic_record_file (MifareTag tag, byte file_no, byte communication_settings, short access_rights,
+				// int record_size, int max_number_of_records) throws Exception
+
+
 				int result = -99;
 				try {
-					result = mifare_desfire_create_std_data_file(tag, fileNumber, commSett, accessRights, fileSize);
+					// the chosen method depends on the type file to be created
+					if (newFragment.isRbStandardChecked()) {
+						Log.d(TAG, "create a standard file");
+						result = mifare_desfire_create_std_data_file(tag, fileNumber, commSett, accessRights, standardFileSize);
+					} else if (newFragment.isRbValueChecked()) {
+						Log.d(TAG, "create a value file");
+						System.out.println("*** create a value file with initial value " + value);
+						// limited credit is disabled
+						result = mifare_desfire_create_value_file(tag, fileNumber, commSett, (short) accessRights, lowerLimit, upperLimit, value, (byte)(0x00));
+						System.out.println("create value file result: " + result);
+					} else if (newFragment.isRbRecordChecked()) {
+						Log.d(TAG, "create a linear record file");
+						System.out.println("*** create a linear record file recordSize " + recordFileSize + " numberOfRecords " + numberOfRecords);
+						result = mifare_desfire_create_linear_record_file(tag, fileNumber, commSett, accessRights, recordFileSize, numberOfRecords);
+					} else if (newFragment.isRbCyclicChecked()) {
+						Log.d(TAG, "create a cyclic record file");
+						System.out.println("*** create a cyclic file recordSize " + recordFileSize + " numberOfRecords " + numberOfRecords);
+						result = mifare_desfire_create_cyclic_record_file(tag, fileNumber, commSett, accessRights, recordFileSize, numberOfRecords);
+
+					}
 				} catch (Exception e) {
 					//throw new RuntimeException(e);
 					newFragment.setLogData("createFile error: " + e.getMessage());

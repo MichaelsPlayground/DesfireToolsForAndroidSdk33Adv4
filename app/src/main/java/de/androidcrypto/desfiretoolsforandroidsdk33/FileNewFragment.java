@@ -29,13 +29,13 @@ public class FileNewFragment extends Fragment {
 
 	// todo block file creation if application id = 00 00 00 = master file application
 
-	private com.shawnlin.numberpicker.NumberPicker npFileId, npKeyRw, npKeyCar, npKeyR, npKeyW;
-	private EditText fileSize;
+	private com.shawnlin.numberpicker.NumberPicker npFileId, npKeyRw, npKeyCar, npKeyR, npKeyW, npNrOfRecords;
+	private EditText standardFileSize, lowerLimit, upperLimit, value, recordFileSize;
 	private AutoCompleteTextView choiceCommunicationSettings;
 	private TextView logData;
 	RadioGroup rgFileType;
-	RadioButton rbStandard, rbValue, rbCyclic;
-	private LinearLayout standardLayout, valueLayout, cyclicLayout;
+	RadioButton rbStandard, rbValue, rbRecord, rbCyclic;
+	private LinearLayout standardLayout, valueLayout, recordLayout;
 	private Button createFile;
 	private DesfireApplication application;
 	private int nrOfApplicationKeys;
@@ -64,14 +64,20 @@ public class FileNewFragment extends Fragment {
 		npKeyCar = view.findViewById(R.id.npKeyCar);
 		npKeyR = view.findViewById(R.id.npKeyR);
 		npKeyW = view.findViewById(R.id.npKeyW);
-		fileSize = view.findViewById(R.id.etFileNewStandardFileSize);
+		standardFileSize = view.findViewById(R.id.etFileNewStandardFileSize);
+		recordFileSize = view.findViewById(R.id.etFileNewRecordFileSize);
+		npNrOfRecords = view.findViewById(R.id.npNrOfRecords);
+		lowerLimit = view.findViewById(R.id.etFileNewValueLowerLimit);
+		upperLimit = view.findViewById(R.id.etFileNewValueUpperLimit);
+		value = view.findViewById(R.id.etFileNewValueValue);
 		logData = view.findViewById(R.id.tvLog);
 		standardLayout = view.findViewById(R.id.llFileNewStandardLinearLayout);
 		valueLayout = view.findViewById(R.id.llFileNewValueLinearLayout);
-		cyclicLayout = view.findViewById(R.id.llFileNewRecordLinearLayout);
+		recordLayout = view.findViewById(R.id.llFileNewRecordLinearLayout);
 		rgFileType =  view.findViewById(R.id.rgFileType);
 		rbStandard =  view.findViewById(R.id.rbStandardFile);
 		rbValue =  view.findViewById(R.id.rbValueFile);
+		rbRecord =  view.findViewById(R.id.rbRecordFile);
 		rbCyclic =  view.findViewById(R.id.rbCyclicFile);
 
 		createFile = view.findViewById(R.id.btnCreateFile);
@@ -89,15 +95,19 @@ public class FileNewFragment extends Fragment {
 		choiceCommunicationSettings = view.findViewById(R.id.spCommunicationSettings);
 		choiceCommunicationSettings.setAdapter(arrayAdapter);
 
+		// todo remove after implementing create value file
+		//rbValue.setEnabled(false);
+
 		// default = standard file
 		standardLayout.setVisibility(View.VISIBLE);
 		valueLayout.setVisibility(View.GONE);
-		cyclicLayout.setVisibility(View.GONE);
+		recordLayout.setVisibility(View.GONE);
+		// as a linear record file and cyclic record file are using the same parameters I'm using the same layout for both
 
 		createFile.setOnClickListener(listener);
 
 		nrOfApplicationKeys = application.getKeys().size();
-
+		// todo implement maximum key number for RW/CAR/R/W number key checker
 
 		rgFileType.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
 
@@ -107,23 +117,26 @@ public class FileNewFragment extends Fragment {
 					View radioButton = radioGroup.findViewById(checkedId);
 					int index = radioGroup.indexOfChild(radioButton);
 
-					// Add logic here
-
 					switch (index) {
-						case 0: // first button plain
+						case 0: // first button standard file
 							standardLayout.setVisibility(View.VISIBLE);
 							valueLayout.setVisibility(View.GONE);
-							cyclicLayout.setVisibility(View.GONE);
+							recordLayout.setVisibility(View.GONE);
 							break;
-						case 1: // second button maced
+						case 1: // second button value file
 							standardLayout.setVisibility(View.GONE);
 							valueLayout.setVisibility(View.VISIBLE);
-							cyclicLayout.setVisibility(View.GONE);
+							recordLayout.setVisibility(View.GONE);
 							break;
-						case 2: // third button encrypted
+						case 2: // third button record file
 							standardLayout.setVisibility(View.GONE);
 							valueLayout.setVisibility(View.GONE);
-							cyclicLayout.setVisibility(View.VISIBLE);
+							recordLayout.setVisibility(View.VISIBLE);
+							break;
+						case 3: // fourth button cyclic file
+							standardLayout.setVisibility(View.GONE);
+							valueLayout.setVisibility(View.GONE);
+							recordLayout.setVisibility(View.VISIBLE);
 							break;
 					}
 				}
@@ -180,11 +193,47 @@ public class FileNewFragment extends Fragment {
 		return npKeyW;
 	}
 
-	public EditText getFileSize() {
-		return fileSize;
+	public EditText getStandardFileSize() {
+		return standardFileSize;
+	}
+
+	public EditText getRecordFileSize() {
+		return recordFileSize;
+	}
+
+	public NumberPicker getNpNrOfRecords() {
+		return npNrOfRecords;
+	}
+
+	public int getLowerLimit() {
+		return Integer.parseInt(lowerLimit.getText().toString());
+	}
+
+	public int getUpperLimit() {
+		return Integer.parseInt(upperLimit.getText().toString());
+	}
+
+	public int getValue() {
+		return Integer.parseInt(value.getText().toString());
 	}
 
 	public int getNrOfApplicationKeys() {
 		return nrOfApplicationKeys;
+	}
+
+	public boolean isRbStandardChecked() {
+		return rbStandard.isChecked();
+	}
+
+	public boolean isRbValueChecked() {
+		return rbValue.isChecked();
+	}
+
+	public boolean isRbRecordChecked() {
+		return rbRecord.isChecked();
+	}
+
+	public boolean isRbCyclicChecked() {
+		return rbCyclic.isChecked();
 	}
 }

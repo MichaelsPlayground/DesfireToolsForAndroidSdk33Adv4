@@ -1,0 +1,148 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+
+	android:orientation="vertical"
+	android:background="@color/white"
+	android:paddingLeft="@dimen/activity_horizontal_fragment_margin"
+	android:paddingRight="@dimen/activity_horizontal_fragment_margin">
+	
+	    <TextView
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:text="@string/applicationNew"
+	        android:layout_marginBottom="10dp"
+	        android:textSize="30sp"
+	        android:layout_gravity="center_horizontal"
+	        />
+
+	<EditText
+		android:id="@+id/etApplicationId"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_marginStart="8dp"
+		android:layout_marginTop="16dp"
+		android:layout_marginEnd="8dp"
+		android:ems="10"
+		android:inputType="text"
+		android:text="080801" />
+
+
+	<TextView
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_marginTop="20dp"
+		android:text="@string/fileNewApplicationId"
+		android:textSize="20sp" />
+
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="180dp"
+		android:orientation="horizontal">
+
+		<com.shawnlin.numberpicker.NumberPicker
+			android:id="@+id/npAid1"
+			android:layout_width="64dp"
+			android:layout_height="wrap_content"
+			android:layout_weight="1"
+			app:np_height="64dp"
+			app:np_max="15"
+			app:np_min="0"
+			app:np_orientation="vertical"
+			app:np_selectedTextSize="20sp"
+			app:np_textSize="16sp"
+			app:np_value="0"
+			app:np_width="32dp" />
+
+		<com.shawnlin.numberpicker.NumberPicker
+			android:id="@+id/npAid2"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_weight="1"
+			app:np_height="64dp"
+			app:np_max="15"
+			app:np_min="0"
+			app:np_orientation="vertical"
+			app:np_selectedTextSize="20sp"
+			app:np_textSize="16sp"
+			app:np_value="0"
+			app:np_width="32dp" />
+
+		<com.shawnlin.numberpicker.NumberPicker
+			android:id="@+id/npAid3"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_weight="1"
+			app:np_height="64dp"
+			app:np_max="15"
+			app:np_min="0"
+			app:np_orientation="vertical"
+			app:np_selectedTextSize="20sp"
+			app:np_textSize="16sp"
+			app:np_value="0"
+			app:np_width="32dp" />
+
+		<com.shawnlin.numberpicker.NumberPicker
+			android:id="@+id/npAid4"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_weight="1"
+			app:np_height="64dp"
+			app:np_max="15"
+			app:np_min="0"
+			app:np_orientation="vertical"
+			app:np_selectedTextSize="20sp"
+			app:np_textSize="16sp"
+			app:np_value="0"
+			app:np_width="32dp" />
+
+		<com.shawnlin.numberpicker.NumberPicker
+			android:id="@+id/npAid5"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_weight="1"
+			app:np_height="64dp"
+			app:np_max="15"
+			app:np_min="0"
+			app:np_orientation="vertical"
+			app:np_selectedTextSize="20sp"
+			app:np_textSize="16sp"
+			app:np_value="0"
+			app:np_width="32dp" />
+
+		<com.shawnlin.numberpicker.NumberPicker
+			android:id="@+id/npAid6"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_weight="1"
+			app:np_height="64dp"
+			app:np_max="15"
+			app:np_min="0"
+			app:np_orientation="vertical"
+			app:np_selectedTextSize="20sp"
+			app:np_textSize="16sp"
+			app:np_value="1"
+			app:np_width="32dp" />
+
+	</LinearLayout>
+
+	<Button
+		android:id="@+id/btnCreateApplication"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_marginStart="8dp"
+		android:layout_marginTop="16dp"
+		android:layout_marginEnd="8dp"
+		android:text="create application" />
+
+	<TextView
+		android:id="@+id/tvLog"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_marginStart="8dp"
+		android:layout_marginTop="16dp"
+		android:layout_marginEnd="8dp"
+		android:text="The log will appear here" />
+
+</LinearLayout>

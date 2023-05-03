@@ -70,6 +70,8 @@ https://github.com/Kaopiz/android-segmented-control
  used for implementation 'info.hoang8f:android-segmented:1.0.6' 
  
 https://github.com/ShawnLin013/NumberPicker for the numberPicker (included in source code), MIT license
+
+http://www.fampennings.nl/maarten/android/09keyboard/index.htm for Custom Keyboard (accepting hex character only)
 ```
 
 ## Changes by MichaelsPlayground & AndroidCrypto
