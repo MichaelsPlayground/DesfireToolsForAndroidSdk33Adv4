@@ -86,6 +86,10 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
     /** this action seems never to be emitted, but is here for future use */
     private static final String ACTION_TAG_LEFT_FIELD = "android.nfc.action.TAG_LOST";
 
+	public static final byte APPLICATION_CRYPTO_DES = 0x00;
+	public static final byte APPLICATION_CRYPTO_3K3DES = 0x40;
+	public static final byte APPLICATION_CRYPTO_AES = (byte) 0x80;
+
 	public static byte[] key_data_aes  = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
 	public static final byte key_data_aes_version = 0x42;
@@ -720,6 +724,20 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
 					return;
 				}
 				System.out.println("aidByte: " + Utils.getHexString(aidByte));
+				String typeOfKeys = newFragment.getChoiceTypeOfKeys();
+				int numberOfKeysWithoutKeyType = newFragment.getNumberOfKeys();
+				int numberOfKeysWithKeyType;
+				if (typeOfKeys.equals("DES")) {
+					numberOfKeysWithKeyType = numberOfKeysWithoutKeyType | APPLICATION_CRYPTO_DES;
+				} else if (typeOfKeys.equals("TDES")) {
+					numberOfKeysWithKeyType = numberOfKeysWithoutKeyType | APPLICATION_CRYPTO_3K3DES;
+				} else if (typeOfKeys.equals("AES")) {
+					numberOfKeysWithKeyType = numberOfKeysWithoutKeyType | APPLICATION_CRYPTO_AES;
+				} else {
+					newFragment.setLogData("The key type is undefined");
+					return;
+				}
+
 				// com.github.skjolber.desfire.libfreefare.MifareDesfire.java
 
 				// select master application
@@ -797,13 +815,22 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
 				// mifare_desfire_create_application_aes (MifareTag tag, DesfireApplicationId aid, byte settings, byte key_no) throws Exception
 				//byte[] aid = new byte[]{(byte) 0x08, (byte) 0x08, (byte) 0x01};
 				DesfireApplicationId desfireApplicationId = new DesfireApplicationId(aidByte);
-				byte aidKeySettings = (byte) 0x0f;
+				byte aidKeySettings = (byte) 0x0f; // fixed at the moment
 				//byte numberOfKeys = (byte) 0x03;
-				byte numberOfKeys = (byte) 0x03;
+				byte numberOfKeysByte = (byte) (numberOfKeysWithKeyType & 0xff);
 
 				int result = -99;
 				try {
-					result = mifare_desfire_create_application_aes(tag, desfireApplicationId, aidKeySettings, numberOfKeys);
+					if (typeOfKeys.equals("DES")) {
+						byte nbrOfKeysByte = (byte) (numberOfKeysWithoutKeyType & 0xff);
+						result = mifare_desfire_create_application(tag, desfireApplicationId, aidKeySettings, nbrOfKeysByte);
+					} else if (typeOfKeys.equals("TDES")) {
+						byte nbrOfKeysByte = (byte) (numberOfKeysWithoutKeyType & 0xff);
+						result = mifare_desfire_create_application_3k3des(tag, desfireApplicationId, aidKeySettings, nbrOfKeysByte);
+					} else if (typeOfKeys.equals("AES")) {
+						byte nbrOfKeysByte = (byte) (numberOfKeysWithoutKeyType & 0xff);
+						result = mifare_desfire_create_application_aes(tag, desfireApplicationId, aidKeySettings, nbrOfKeysByte);
+					}
 				} catch (Exception e) {
 					//throw new RuntimeException(e);
 					newFragment.setLogData("createApplication error: " + e.getMessage());

@@ -15,6 +15,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -72,10 +74,11 @@ public class ApplicationNewFragment extends Fragment {
 	}
 
 	private TextView logData;
-	//private EditText appId;
-	private EditText appId;
-	com.google.android.material.textfield.TextInputEditText appId2;
-	private com.shawnlin.numberpicker.NumberPicker aid1, aid2, aid3, aid4, aid5, aid6;
+	com.google.android.material.textfield.TextInputEditText appId;
+	private com.shawnlin.numberpicker.NumberPicker aid1, aid2, aid3, aid4, aid5, aid6, numberOfKeys;
+	private AutoCompleteTextView choiceTypeOfKeys;
+	String[] data = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "F"};
+	private String[] aids = new String[6];
 	private Button createApplication;
 	private View.OnClickListener listener;
 
@@ -101,29 +104,34 @@ public class ApplicationNewFragment extends Fragment {
 	public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
 
-		appId = view.findViewById(R.id.etApplicationId);
-		appId2= view.findViewById(R.id.etAppNewAppId);
+		appId= view.findViewById(R.id.etAppNewAppId);
 		aid1 = view.findViewById(R.id.npAid1);
 		aid2 = view.findViewById(R.id.npAid2);
+		aid3 = view.findViewById(R.id.npAid3);
+		aid4 = view.findViewById(R.id.npAid4);
+		aid5 = view.findViewById(R.id.npAid5);
+		aid6 = view.findViewById(R.id.npAid6);
+		choiceTypeOfKeys = view.findViewById(R.id.spTypeOfKeys);
+		numberOfKeys = view.findViewById(R.id.npNumberOfKeys);
 		logData = view.findViewById(R.id.tvLog);
 		createApplication = view.findViewById(R.id.btnCreateApplication);
 
 		createApplication.setOnClickListener(listener);
-		appId2.setInputType(InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+		appId.setInputType(InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
 
-		appId2.setText("000001");
+		appId.setText("000001");
 
+		initNumberPicker();
 
-		String[] data = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "F"};
-		String[] aids = new String[6];
-		aid1.setMinValue(1);
-		aid1.setMaxValue(data.length);
-		aid1.setDisplayedValues(data);
-		aid1.setValue(0);
-		aid2.setMinValue(1);
-		aid2.setMaxValue(data.length);
-		aid2.setDisplayedValues(data);
-		aid2.setValue(8);
+		String[] typeKeys = new String[]{"DES",
+				"TDES",
+				"AES",
+		};
+		ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(
+				getContext(),
+				R.layout.drop_down_item,
+				typeKeys);
+		choiceTypeOfKeys.setAdapter(arrayAdapter);
 
 		// OnValueChangeListener
 		aid1.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
@@ -142,7 +150,70 @@ public class ApplicationNewFragment extends Fragment {
 				showAid(aids);
 			}
 		});
+		aid3.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
+			@Override
+			public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+				Log.d(TAG, String.format(Locale.US, "oldVal: %d, newVal: %d", oldVal, newVal));
+				aids[2] = data[newVal-1];
+				showAid(aids);
+			}
+		});
+		aid4.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
+			@Override
+			public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+				Log.d(TAG, String.format(Locale.US, "oldVal: %d, newVal: %d", oldVal, newVal));
+				aids[3] = data[newVal-1];
+				showAid(aids);
+			}
+		});
+		aid5.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
+			@Override
+			public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+				Log.d(TAG, String.format(Locale.US, "oldVal: %d, newVal: %d", oldVal, newVal));
+				aids[4] = data[newVal-1];
+				showAid(aids);
+			}
+		});
+		aid6.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
+			@Override
+			public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+				Log.d(TAG, String.format(Locale.US, "oldVal: %d, newVal: %d", oldVal, newVal));
+				aids[5] = data[newVal-1];
+				showAid(aids);
+			}
+		});
 
+	}
+
+	private void initNumberPicker() {
+		aid1.setMinValue(1);
+		aid1.setMaxValue(data.length);
+		aid1.setDisplayedValues(data);
+		aid1.setValue(1);
+		aid2.setMinValue(1);
+		aid2.setMaxValue(data.length);
+		aid2.setDisplayedValues(data);
+		aid2.setValue(1);
+		aid3.setMinValue(1);
+		aid3.setMaxValue(data.length);
+		aid3.setDisplayedValues(data);
+		aid3.setValue(1);
+		aid4.setMinValue(1);
+		aid4.setMaxValue(data.length);
+		aid4.setDisplayedValues(data);
+		aid4.setValue(1);
+		aid5.setMinValue(1);
+		aid5.setMaxValue(data.length);
+		aid5.setDisplayedValues(data);
+		aid5.setValue(1);
+		aid6.setMinValue(1);
+		aid6.setMaxValue(data.length);
+		aid6.setDisplayedValues(data);
+		aid6.setValue(2);
+		for (int i = 0; i < 5; i++) {
+			aids[i] = "0";
+		}
+		aids[5] = "1";
 	}
 
 	private void showAid(String[] aids) {
@@ -150,7 +221,7 @@ public class ApplicationNewFragment extends Fragment {
 		for (int i = 0; i < 6; i++) {
 			sb.append(aids[i]);
 		}
-		appId2.setText(sb.toString());
+		appId.setText(sb.toString());
 	}
 
 	public void setOnClickListener(View.OnClickListener listener) {
@@ -162,6 +233,14 @@ public class ApplicationNewFragment extends Fragment {
 	}
 
 	public String getAid() {return appId.getText().toString();}
+
+	public String getChoiceTypeOfKeys() {
+		return choiceTypeOfKeys.getText().toString();
+	}
+
+	public int getNumberOfKeys() {
+		return numberOfKeys.getValue();
+	}
 }
 
 
