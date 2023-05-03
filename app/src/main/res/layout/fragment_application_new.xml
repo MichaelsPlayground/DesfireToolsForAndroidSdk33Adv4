@@ -76,6 +76,21 @@
                     tools:ignore="KeyboardInaccessibleWidget" />
             </com.google.android.material.textfield.TextInputLayout>
 
+            <EditText
+                android:id="@+id/et_hexcolor"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignLeft="@+id/tv_inputcolor"
+                android:layout_below="@+id/tv_inputcolor"
+                android:layout_marginTop="10dp"
+                android:ems="6"
+                android:inputType="textCapCharacters|textNoSuggestions|textVisiblePassword"
+                android:maxEms="6"
+                android:maxLength="6"
+                android:maxLines="1"
+                android:minLines="1"
+                android:text="FFFFFF" />
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="64dp"

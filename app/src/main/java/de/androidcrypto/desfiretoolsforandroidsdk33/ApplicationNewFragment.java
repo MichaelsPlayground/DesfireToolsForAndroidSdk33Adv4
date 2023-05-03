@@ -3,6 +3,7 @@ package de.androidcrypto.desfiretoolsforandroidsdk33;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.InputFilter;
@@ -14,6 +15,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
@@ -21,6 +23,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -75,6 +78,7 @@ public class ApplicationNewFragment extends Fragment {
 
 	private TextView logData;
 	com.google.android.material.textfield.TextInputEditText appId;
+	EditText hexColor;
 	private com.shawnlin.numberpicker.NumberPicker aid1, aid2, aid3, aid4, aid5, aid6, numberOfKeys;
 	private AutoCompleteTextView choiceTypeOfKeys;
 	String[] data = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "F"};
@@ -113,6 +117,7 @@ public class ApplicationNewFragment extends Fragment {
 		aid6 = view.findViewById(R.id.npAid6);
 		choiceTypeOfKeys = view.findViewById(R.id.spTypeOfKeys);
 		numberOfKeys = view.findViewById(R.id.npNumberOfKeys);
+		hexColor = view.findViewById(R.id.et_hexcolor);
 		logData = view.findViewById(R.id.tvLog);
 		createApplication = view.findViewById(R.id.btnCreateApplication);
 
@@ -182,6 +187,39 @@ public class ApplicationNewFragment extends Fragment {
 				showAid(aids);
 			}
 		});
+
+		//This prevents the EditText View from automatically receiving focus on Activity startup
+		getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+
+		//Assign a TextWatcher to the EditText
+		hexColor.addTextChangedListener(new TextWatcher()
+		{
+			@Override
+			public void onTextChanged(CharSequence s, int start, int before, int count){}
+
+			@Override
+			public void beforeTextChanged(CharSequence s, int start, int count,int after){}
+
+			//Right after the text is changed
+			@Override
+			public void afterTextChanged(Editable s)
+			{
+				//Store the text on a String
+				String text = s.toString();
+
+				//Get the length of the String
+				int length = s.length();
+
+				/*If the String length is bigger than zero and it's not
+				composed only by the following characters: A to F and/or 0 to 9 */
+				if(!text.matches("[a-fA-F0-9]+") && length > 0)
+				{
+					//Delete the last character
+					s.delete(length - 1, length);
+				}
+			}
+		});
+
 
 	}
 
