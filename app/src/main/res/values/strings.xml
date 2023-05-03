@@ -133,6 +133,7 @@
 
     <string name="nfcNotAvailableMessage">NFC is not available.</string>
     <string name="nfcNotEnabledMessage">NFC is disabled, please enable it before continuing.</string>
+
     <string name="addApplication">add an application</string>
     <string name="applicationAdd">add application</string>
     <string name="applicationNew">Add an application</string>
@@ -151,5 +152,10 @@
     <string name="rbRecordFile">create a record file</string>
     <string name="fileNewValueLimitedCreditInformation">Note: The Limited credit feature is disabled and not supported at this time</string>
     <string name="fileNewApplicationId">Application Identifier (AID):</string>
-
+    <string name="appNewAid1">AID 1:</string>
+    <string name="appNewAid2">AID 2:</string>
+    <string name="appNewAid3">AID 3:</string>
+    <string name="appNewAid4">AID 4:</string>
+    <string name="appNewAid5">AID 5:</string>
+    <string name="appNewAid6">AID 6:</string>
 </resources>

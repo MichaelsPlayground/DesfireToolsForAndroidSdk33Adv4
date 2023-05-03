@@ -5,9 +5,12 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.os.Bundle;
 import android.text.Editable;
+import android.text.InputFilter;
+import android.text.InputType;
 import android.text.Spanned;
 import android.text.TextWatcher;
 import android.text.style.ReplacementSpan;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,8 +25,13 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.github.skjolber.desfire.ev1.model.DesfireApplication;
+import com.shawnlin.numberpicker.NumberPicker;
+
 
 import java.util.List;
+import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * class added by MichaelsPlayground / AndroidCrypto
@@ -35,7 +43,7 @@ public class ApplicationNewFragment extends Fragment {
 	// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
 	private static final String ARG_PARAM1 = "param1";
 	private static final String ARG_PARAM2 = "param2";
-	private static final String TAG = "ReadFragment";
+	private static final String TAG = "ApplicationNewFragment";
 
 	// TODO: Rename and change types of parameters
 	private String mParam1;
@@ -64,8 +72,10 @@ public class ApplicationNewFragment extends Fragment {
 	}
 
 	private TextView logData;
+	//private EditText appId;
 	private EditText appId;
 	com.google.android.material.textfield.TextInputEditText appId2;
+	private com.shawnlin.numberpicker.NumberPicker aid1, aid2, aid3, aid4, aid5, aid6;
 	private Button createApplication;
 	private View.OnClickListener listener;
 
@@ -93,44 +103,54 @@ public class ApplicationNewFragment extends Fragment {
 
 		appId = view.findViewById(R.id.etApplicationId);
 		appId2= view.findViewById(R.id.etAppNewAppId);
+		aid1 = view.findViewById(R.id.npAid1);
+		aid2 = view.findViewById(R.id.npAid2);
 		logData = view.findViewById(R.id.tvLog);
 		createApplication = view.findViewById(R.id.btnCreateApplication);
 
 		createApplication.setOnClickListener(listener);
+		appId2.setInputType(InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+
+		appId2.setText("000001");
 
 
+		String[] data = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "F"};
+		String[] aids = new String[6];
+		aid1.setMinValue(1);
+		aid1.setMaxValue(data.length);
+		aid1.setDisplayedValues(data);
+		aid1.setValue(0);
+		aid2.setMinValue(1);
+		aid2.setMaxValue(data.length);
+		aid2.setDisplayedValues(data);
+		aid2.setValue(8);
 
-		appId2.addTextChangedListener(new TextWatcher() {
+		// OnValueChangeListener
+		aid1.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
 			@Override
-			public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
-			@Override
-			public void onTextChanged(CharSequence s, int start, int before, int count) {}
-
-			@Override
-			public void afterTextChanged(Editable editable) {
-				Object[] paddingSpans = editable.getSpans(0, editable.length(), SpaceSpan.class);
-				for (Object span : paddingSpans) {
-					editable.removeSpan(span);
-				}
-
-				addSpans(editable);
+			public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+				Log.d(TAG, String.format(Locale.US, "oldVal: %d, newVal: %d", oldVal, newVal));
+				aids[0] = data[newVal-1];
+				showAid(aids);
 			}
-
-			private static final int GROUP_SIZE = 1;
-
-			private void addSpans(Editable editable) {
-
-				final int length = editable.length();
-				for (int i = 1; i * (GROUP_SIZE) < length; i++) {
-					int index = i * GROUP_SIZE;
-					editable.setSpan(new SpaceSpan(), index - 1, index,
-							Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-				}
+		});
+		aid2.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
+			@Override
+			public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+				Log.d(TAG, String.format(Locale.US, "oldVal: %d, newVal: %d", oldVal, newVal));
+				aids[1] = data[newVal-1];
+				showAid(aids);
 			}
 		});
 
-		appId2.setText("000001");
+	}
+
+	private void showAid(String[] aids) {
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < 6; i++) {
+			sb.append(aids[i]);
+		}
+		appId2.setText(sb.toString());
 	}
 
 	public void setOnClickListener(View.OnClickListener listener) {
@@ -144,23 +164,4 @@ public class ApplicationNewFragment extends Fragment {
 	public String getAid() {return appId.getText().toString();}
 }
 
-/**
- * A {@link ReplacementSpan} used for spacing in {@link android.widget.EditText}
- * to space things out. Adds ' 's
- */
-class SpaceSpan extends ReplacementSpan {
-
-	@Override
-	public int getSize(@NonNull Paint paint, CharSequence text, int start, int end, Paint.FontMetricsInt fm) {
-		float padding = paint.measureText(" ", 0, 1);
-		float textSize = paint.measureText(text, start, end);
-		return (int) (padding + textSize);
-	}
-
-	@Override
-	public void draw(@NonNull Canvas canvas, CharSequence text, int start, int end, float x, int top, int y,
-					 int bottom, @NonNull Paint paint) {
-		canvas.drawText(text.subSequence(start, end) + " ", x, y, paint);
-	}
-}
 

@@ -42,6 +42,8 @@ public class FileNewFragment extends Fragment {
 
 	private View.OnClickListener listener;
 
+
+
 	// todo use Bundle instead of a constructor for parameter
 	@SuppressLint("ValidFragment")
 	public FileNewFragment(DesfireApplication application) {

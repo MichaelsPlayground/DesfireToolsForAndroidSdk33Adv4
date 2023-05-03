@@ -74,6 +74,14 @@ https://github.com/ShawnLin013/NumberPicker for the numberPicker (included in so
 http://www.fampennings.nl/maarten/android/09keyboard/index.htm for Custom Keyboard (accepting hex character only)
 ```
 
+settings.gradle:
+```plaintext
+rootProject.name = "DesfireToolsForAndroidSdk33Adv2"
+include ':app'
+include ':keyboard'
+
+```
+
 ## Changes by MichaelsPlayground & AndroidCrypto
 
 1) de.androidcrypto.desfiretoolsforandroidsdk33.FileFragment.java: show content of StandardFile in hex and string representation
