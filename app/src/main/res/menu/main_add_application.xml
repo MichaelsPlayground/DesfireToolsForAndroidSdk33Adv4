@@ -22,5 +22,8 @@
         android:title="@string/fileAdd"
         android:icon="@android:drawable/ic_menu_add"
         app:showAsAction="never" />
+    <item android:id="@+id/action_free_memory"
+        android:title="@string/freeMemory"
+        app:showAsAction="never" />
     
 </menu>

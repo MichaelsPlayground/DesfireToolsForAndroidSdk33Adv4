@@ -192,6 +192,7 @@ public class ApplicationNewFragment extends Fragment {
 		getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
 		//Assign a TextWatcher to the EditText
+		// http://www.41post.com/5108/programming/android-hexadecimal-color-input-using-an-edittext
 		hexColor.addTextChangedListener(new TextWatcher()
 		{
 			@Override

@@ -16,6 +16,7 @@ import android.app.AlertDialog;
 import android.app.Fragment;
 //import android.app.FragmentManager;
 import android.content.BroadcastReceiver;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
@@ -76,6 +77,7 @@ import de.androidcrypto.desfiretoolsforandroidsdk33.keys.DataSource;
 /**
  * Note on DesfireToolsForAndroidSdk33Adv2
  * This is the same code as on Adv1 but all fragments are substituted from old/deprecated Fragment to AndroidX Fragment
+ * Some new functions were implemented and error corrections has been done
  */
 
 @SuppressLint("ResourceAsColor")
@@ -747,13 +749,13 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
 					selectMasterApplicationResult = mifare_desfire_select_application(tag, null);
 				} catch (Exception e) {
 					// throw new RuntimeException(e);
-					newFragment.setLogData("createApplication error: " + e.getMessage());
+					newFragment.setLogData("selectMasterApplication error: " + e.getMessage());
 					return;
 				}
 				if (selectMasterApplicationResult == 0) {
-					newFragment.setLogData("createApplication success");
+					newFragment.setLogData("selectMasterApplication success");
 				} else {
-					newFragment.setLogData("createApplication failure: " + selectMasterApplicationResult);
+					newFragment.setLogData("selectMasterApplication failure: " + selectMasterApplicationResult);
 					return;
 				}
 
@@ -1146,6 +1148,7 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
 		MenuItem save = menu.findItem(R.id.action_save);
 		MenuItem addApplication = menu.findItem(R.id.action_add_app); // added
 		MenuItem addFile = menu.findItem(R.id.action_add_file); // added
+		MenuItem freeMemory = menu.findItem(R.id.action_free_memory); // added
 
 		//FragmentManager fragmentManager = getFragmentManager();
 		//String name = fragmentManager.getBackStackEntryAt(fragmentManager.getBackStackEntryCount() - 1).getName();
@@ -1172,6 +1175,7 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
 			//addKey.setVisible(true);
 			addApplication.setVisible(true); // added
 			addFile.setVisible(false); // added
+			freeMemory.setVisible(true); // added
 		} else {
 			//keys.setVisible(true);
 			//addKey.setVisible(false);
@@ -1189,8 +1193,9 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
 
 		Log.d(TAG, "Prepare options menu for " + name);
 		if(name != null && name.equals("file")) {
-			getFragmentManager().executePendingTransactions();
-			
+			//getFragmentManager().executePendingTransactions();
+			getSupportFragmentManager().executePendingTransactions();
+
 			FileFragment fragment = (FileFragment) fragmentManager.findFragmentByTag("file");
 			
 			DesfireFile file = fragment.getFile();
@@ -1224,6 +1229,9 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
 		} else if (item.getItemId() == R.id.action_add_file) { // added
 			showFileNewFragment();
 			return true;
+		} else if (item.getItemId() == R.id.action_free_memory) { // added
+			showFreeMemory();
+			return true;
 		} else {
 			return super.onOptionsItemSelected(item);
 		}
@@ -1247,7 +1255,150 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
     	}
 		*/
 	}
-	
+
+	// added
+	private void showFreeMemory() {
+		int memory = 0;
+		try {
+			memory = mifare_desfire_get_free_memory(tag);
+		} catch (Exception e) {
+			showToastShortToast("Error when get the free memory on card");
+		}
+		showToastShortToast("The free memory on card is " + String.valueOf(memory) + " bytes");
+		formatPicc(); // ###
+	}
+
+	// added
+
+	/**
+	 * This method will setup keys for all key types (DES, 3DES, 3K3DES and AES)
+	 * It will add 3 keys (nr 0, 1 and 2) for each type
+	 * The naming will get this structure (e.g. for DES):
+	 * DES
+	 *     0 RW
+	 *     1 R
+	 *     2 W
+	 * The keys will get these lengths:
+	 * DES = 8 bytes long, 3DES = 16 bytes long, 3K3DES = 24 bytes long and AES = 16 bytes long
+	 * The first byte will get these hex bytes:
+	 * DES = 0xD1, 3DES = 0xD3, 3K3DES = 0xD4, AES = 0xA1
+	 * The byte is set due to key number
+	 * key 0 (RW) = 0xF0, 1 (R) = 0xF1, 2 (W) = 0xF2
+	 * The following bytes will be filled with 0x00's
+	 */
+	private void setupSampleKeys() {
+		int numberOfKeys = 3;
+		int lengthDes = 8;
+		int length3Des = 16;
+		int length3K3Des = 24;
+		int lengthAes = 16;
+
+		// des
+		for (int i = 0; i < numberOfKeys; i++) {
+			byte[] key = new byte[lengthDes];
+			key[0] = (byte) (0xD1);
+			key[1] = (byte) ((byte)(0xF0) | (byte) (i & 0xff));
+			StringBuilder sb = new StringBuilder();
+			sb.append("3DES ").append(i);
+			if (i == 0) {
+				sb.append(" RW");
+			} else if (i == 1) {
+				sb.append(" R");
+			} else if (i == 2) {
+				sb.append(" W");
+			} else {
+				sb.append(" unknown");
+			}
+			DesfireKey desfireKey = DesfireKey.newInstance(DesfireKeyType.DES, Integer.parseInt("EE", 16));
+			desfireKey.setName(sb.toString());
+			desfireKey.setValue(key);
+			try {
+				MainApplication.getInstance().getDataSource().createKey(desfireKey);
+			} catch (IOException e) {
+				Log.d(TAG, "Problem adding key", e);
+			}
+		} // DES
+
+		// 3des
+		for (int i = 0; i < numberOfKeys; i++) {
+			byte[] key = new byte[length3Des];
+			key[0] = (byte) (0xD3);
+			key[1] = (byte) ((byte)(0xF0) | (byte) (i & 0xff));
+			StringBuilder sb = new StringBuilder();
+			sb.append("DES ").append(i);
+			if (i == 0) {
+				sb.append(" RW");
+			} else if (i == 1) {
+				sb.append(" R");
+			} else if (i == 2) {
+				sb.append(" W");
+			} else {
+				sb.append(" unknown");
+			}
+			DesfireKey desfireKey = DesfireKey.newInstance(DesfireKeyType.TDES, Integer.parseInt("EE", 16));
+			desfireKey.setName(sb.toString());
+			desfireKey.setValue(key);
+			try {
+				MainApplication.getInstance().getDataSource().createKey(desfireKey);
+			} catch (IOException e) {
+				Log.d(TAG, "Problem adding key", e);
+			}
+		} // 3DES
+
+		// 3K3des
+		for (int i = 0; i < numberOfKeys; i++) {
+			byte[] key = new byte[length3K3Des];
+			key[0] = (byte) (0xD4);
+			key[1] = (byte) ((byte)(0xF0) | (byte) (i & 0xff));
+			StringBuilder sb = new StringBuilder();
+			sb.append("3K3DES ").append(i);
+			if (i == 0) {
+				sb.append(" RW");
+			} else if (i == 1) {
+				sb.append(" R");
+			} else if (i == 2) {
+				sb.append(" W");
+			} else {
+				sb.append(" unknown");
+			}
+			DesfireKey desfireKey = DesfireKey.newInstance(DesfireKeyType.TKTDES, Integer.parseInt("EE", 16));
+			desfireKey.setName(sb.toString());
+			desfireKey.setValue(key);
+			try {
+				MainApplication.getInstance().getDataSource().createKey(desfireKey);
+			} catch (IOException e) {
+				Log.d(TAG, "Problem adding key", e);
+			}
+		} // 3K3DES
+
+		// aes
+		for (int i = 0; i < numberOfKeys; i++) {
+			byte[] key = new byte[lengthAes];
+			key[0] = (byte) (0xA1);
+			key[1] = (byte) ((byte)(0xF0) | (byte) (i & 0xff));
+			StringBuilder sb = new StringBuilder();
+			sb.append("AES ").append(i);
+			if (i == 0) {
+				sb.append(" RW");
+			} else if (i == 1) {
+				sb.append(" R");
+			} else if (i == 2) {
+				sb.append(" W");
+			} else {
+				sb.append(" unknown");
+			}
+			DesfireKey desfireKey = DesfireKey.newInstance(DesfireKeyType.AES, Integer.parseInt("EE", 16));
+			desfireKey.setName(sb.toString());
+			desfireKey.setValue(key);
+			try {
+				MainApplication.getInstance().getDataSource().createKey(desfireKey);
+			} catch (IOException e) {
+				Log.d(TAG, "Problem adding key", e);
+			}
+		} // AES
+
+	}
+
 	private void addKey() {
 		//KeyListFragment fragment = (KeyListFragment) getFragmentManager().findFragmentByTag("keys");
 		KeyListFragment fragment = (KeyListFragment) getSupportFragmentManager().findFragmentByTag("keys");
@@ -1530,6 +1681,10 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
 		Toast.makeText(getApplicationContext(), getString(resource), Toast.LENGTH_SHORT).show();
 	}
 
+	public void showToastShortToast(String message) {
+		Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
+	}
+
 	private void showFileFragment(DesfireFile file) {
 		Log.d(TAG, "showFileFragment");
 		
@@ -1598,8 +1753,8 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
 		@Override
 		public void onConfirmSave(String absolutePath, String fileName) {
 			if(absolutePath == null || absolutePath.length() == 0 || fileName == null || fileName.length() == 0) {
-		    	getFragmentManager().popBackStack();
-	
+		    	//getFragmentManager().popBackStack();
+				getSupportFragmentManager().popBackStack();
 				
 				return;
 			}
@@ -1657,9 +1812,110 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
 	        		}
 	        	}
 	        }
-	    	getFragmentManager().popBackStack();
+	    	//getFragmentManager().popBackStack();
+			getSupportFragmentManager().popBackStack();
 
 		}
+	}
+
+	private void formatPicc() {
+		new AlertDialog.Builder(this).setTitle("Confirm Formatting the PICC?")
+				.setMessage("Are you sure - this is irreversible?\n\nYou need to authenticate with the Master key first depending on PICC's settings!")
+				.setPositiveButton("YES",
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int which) {
+								try {
+
+									// select master application first
+									//public static int mifare_desfire_select_application (MifareTag tag, DesfireApplicationId aid) throws Exception
+									System.out.println("*** start selectMasterApplication");
+									int selectMasterApplicationResult = -99;
+									try {
+										selectMasterApplicationResult = mifare_desfire_select_application(tag, null);
+									} catch (Exception e) {
+										// throw new RuntimeException(e);
+										showToastShortToast("selectMasterApplication error: " + e.getMessage());
+										return;
+									}
+									System.out.println("*** selectMasterApplicationResult: " + selectMasterApplicationResult);
+									if (selectMasterApplicationResult == 0) {
+										showToastShortToast("selectMasterApplication success");
+									} else {
+										showToastShortToast("selectMasterApplication failure: " + selectMasterApplicationResult);
+										return;
+									}
+
+									// we need to authenticate second !
+									application = applications.get(0); // master application
+									if (application != null) {
+										System.out.println("*** application keys size: " + application.getKeys().size());
+									}
+									System.out.println("*** get keySettings start");
+									DesfireApplicationKeySettings keySettings = application.getKeySettings();
+									Log.d(TAG, keySettings.toString());
+									System.out.println("*** get keySettings end");
+
+									//if(keySettings.isRequiresMasterKeyForDirectoryList()) { // authenticate in every case
+										final List<DesfireApplicationKey> keys = application.getKeys();
+									System.out.println("*** get key List end: " + keys);
+									if (keys != null) {
+										System.out.println("*** get key List end: " + keys.size());
+									}
+										final DesfireApplicationKey root = keys.get(0);
+									System.out.println("*** get root keys end");
+									System.out.println("*** DesfireApplicationKey root: " + root.toString());
+
+										showKeySelector(keySettings.getType(), new OnKeyListener() {
+											@Override
+											public void onKey(DesfireKey key) {
+												if(!isConnected()) {
+													Log.d(TAG, "Tag lost wanting to select application");
+													onTagLost();
+													return;
+												}
+												try {
+													DesfireApplicationKey clone = new DesfireApplicationKey(root.getIndex(), key);
+													if(authenticate(clone)) {
+														MainActivity.this.authenticatedKey = clone;
+														// todo run the code after auth here ?
+														showToast(R.string.applicationAuthenticatedSuccess);
+														int result = mifare_desfire_format_picc(tag);
+														showToastShortToast("formatting result (0 is OK): " + String.valueOf(result));
+													} else {
+														showToast(R.string.applicationAuthenticatedFail);
+													}
+
+												} catch (Exception e) {
+													Log.d(TAG, "Unable to authenticate", e);
+													showToast(R.string.applicationAuthenticatedFail);
+												}
+											}
+										});
+								/*
+								} else {
+										//Log.d(TAG, "Can't authenticate an application");
+										// we do mot need to authenticate
+										int result = mifare_desfire_format_picc(tag);
+										showToastShortToast("formatting result (0 is OK): " + String.valueOf(result));
+									}
+
+								 */
+
+								} catch (Exception e) {
+									showToastShortToast("error on formatting the card");
+								}
+								dialog.dismiss();
+							}
+						})
+				.setNegativeButton("NO", new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						// Do nothing
+						dialog.dismiss();
+					}
+				})
+				.create()
+				.show();
 	}
 
 	

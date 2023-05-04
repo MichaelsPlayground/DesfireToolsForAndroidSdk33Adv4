@@ -160,4 +160,5 @@
     <string name="appNewAid6">AID 6:</string>
     <string name="appNewKeySetupInformation">The new application will be setup with a fixed KEY SETTING 0F, means that the application master key can be changed, Get FID list, Get File Settings and Get Key settings are without application master key, Create and Delete file are permitted without application master key and this settings can be changed.</string>
     <string name="appNewNumberOfKeys">Number of keys</string>
+    <string name="freeMemory">free memory</string>
 </resources>

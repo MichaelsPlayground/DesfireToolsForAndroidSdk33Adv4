@@ -9,8 +9,10 @@ import static com.github.skjolber.desfire.libfreefare.MifareDesfireCrypto.mifare
 import static com.github.skjolber.desfire.libfreefare.MifareDesfireCrypto.mifare_cypher_blocks_chained;
 import static com.github.skjolber.desfire.libfreefare.MifareDesfireCrypto.rol;
 
+import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import com.github.skjolber.desfire.ev1.model.DesfireApplicationId;
@@ -259,6 +261,73 @@ public class MifareDesfire {
 	private static void ASSERT_MIFARE_DESFIRE(MifareTag tag) {
 		
 	}
+
+	/**
+	 * get the free memory on the card
+	 * added by MichaelsPlayground/AndroidCrypto
+	 */
+
+	public static int mifare_desfire_get_free_memory2(MifareTag tag) {
+		byte getFreeMemoryCommand = (byte) 0x6e;
+		byte[] getFreeMemoryResponse = new byte[0];
+		try {
+			getFreeMemoryResponse = DESFIRE_TRANSCEIVE_SINGLE(tag, ByteBuffer.allocateDirect(getFreeMemoryCommand), DefaultIsoDepAdapter.OPERATION_OK);
+			//getFreeMemoryResponse = DESFIRE_TRANSCEIVE2 (tag, wrapMessage(getFreeMemoryCommand, null));
+		} catch (Exception e) {
+			//throw new RuntimeException(e);
+			Log.e(TAG, "Error when sending command " + e.getMessage());
+			return 0;
+		}
+		int memorySize = 0;
+		if (getFreeMemoryResponse.length > 2) {
+			byte[] lengthBytes = Arrays.copyOf(getFreeMemoryResponse, getFreeMemoryResponse.length - 2);
+			memorySize = byteArrayLength3InversedToInt(lengthBytes);
+		}
+		return memorySize;
+	}
+
+	private static byte[] wrapMessage(byte command, byte[] parameters) throws Exception {
+		ByteArrayOutputStream stream = new ByteArrayOutputStream();
+		stream.write((byte) 0x90);
+		stream.write(command);
+		stream.write((byte) 0x00);
+		stream.write((byte) 0x00);
+		if (parameters != null) {
+			stream.write((byte) parameters.length);
+			stream.write(parameters);
+		}
+		//stream.write((byte) 0x00);
+		return stream.toByteArray();
+	}
+
+	private static int byteArrayLength3InversedToInt(byte[] data) {
+		return (data[2] & 0xff) << 16 | (data[1] & 0xff) << 8 | (data[0] & 0xff);
+	}
+
+	// was available but commented out
+	public static int
+	mifare_desfire_get_free_memory (MifareTag tag) throws Exception
+	{
+		ASSERT_ACTIVE (tag);
+		ASSERT_MIFARE_DESFIRE (tag);
+
+		ByteBuffer cmd = C.BUFFER_INIT (4 + CMAC_LENGTH);
+
+		C.BUFFER_APPEND (cmd, 0x6E);
+		byte[] p = MifareDesfireCrypto.mifare_cryto_preprocess_data (tag, cmd, cmd.position(), 0, MifareDesfireCrypto.MDCM_PLAIN | MifareDesfireCrypto.CMAC_COMMAND);
+		byte[] res = DESFIRE_TRANSCEIVE2 (tag, p);
+		byte[] buffer = new byte[1 + CMAC_LENGTH];
+		System.arraycopy(res, 0, buffer, 0, res.length);
+		p = MifareDesfireCrypto.mifare_cryto_postprocess_data (tag, buffer, res.length, MifareDesfireCrypto.MDCM_PLAIN | MifareDesfireCrypto.CMAC_COMMAND | MifareDesfireCrypto.CMAC_VERIFY);
+		int memorySize = 0;
+		if (p.length > 2) {
+			byte[] lengthBytes = Arrays.copyOf(p, p.length - 2);
+			memorySize = byteArrayLength3InversedToInt(lengthBytes);
+		}
+		return memorySize;
+	}
+
+
 
 	/*
 	 * Terminate connection with the provided tag.
