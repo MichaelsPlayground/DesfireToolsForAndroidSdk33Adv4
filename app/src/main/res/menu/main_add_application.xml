@@ -10,6 +10,9 @@
          android:title="@string/keyAdd"
           android:icon="@android:drawable/ic_menu_add"
          app:showAsAction="always" />
+    <item android:id="@+id/action_sample_keys"
+        android:title="@string/keyAddSamples"
+        app:showAsAction="never" />
     <item android:id="@+id/action_save"
         android:title="@string/fileSave"
           android:icon="@android:drawable/ic_menu_save"
@@ -24,6 +27,9 @@
         app:showAsAction="never" />
     <item android:id="@+id/action_free_memory"
         android:title="@string/freeMemory"
+        app:showAsAction="never" />
+    <item android:id="@+id/action_format_picc"
+        android:title="@string/formatPicc"
         app:showAsAction="never" />
     
 </menu>

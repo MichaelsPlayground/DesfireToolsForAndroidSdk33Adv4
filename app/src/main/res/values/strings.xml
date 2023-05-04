@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Mifare Desfire Tool SDK33 Adv2</string>
+    <string name="app_name">Mifare Desfire Tool SDK33 Adv3</string>
 
     <string name="applicationList">Application list</string>
     <string name="applicationId">Application %s</string>
@@ -161,4 +161,6 @@
     <string name="appNewKeySetupInformation">The new application will be setup with a fixed KEY SETTING 0F, means that the application master key can be changed, Get FID list, Get File Settings and Get Key settings are without application master key, Create and Delete file are permitted without application master key and this settings can be changed.</string>
     <string name="appNewNumberOfKeys">Number of keys</string>
     <string name="freeMemory">free memory</string>
+    <string name="formatPicc">format PICC</string>
+    <string name="keyAddSamples">add sample keys</string>
 </resources>
