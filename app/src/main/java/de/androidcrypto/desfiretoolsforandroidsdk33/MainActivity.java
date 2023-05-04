@@ -1230,7 +1230,8 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
 			showFileNewFragment();
 			return true;
 		} else if (item.getItemId() == R.id.action_free_memory) { // added
-			showFreeMemory();
+			//showFreeMemory();
+			formatPicc();
 			return true;
 		} else {
 			return super.onOptionsItemSelected(item);
@@ -1265,7 +1266,6 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
 			showToastShortToast("Error when get the free memory on card");
 		}
 		showToastShortToast("The free memory on card is " + String.valueOf(memory) + " bytes");
-		formatPicc(); // ###
 	}
 
 	// added
@@ -1845,52 +1845,57 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
 										return;
 									}
 
-									// we need to authenticate second !
-									application = applications.get(0); // master application
-									if (application != null) {
-										System.out.println("*** application keys size: " + application.getKeys().size());
+									if (application == null) {
+										System.out.println("application is null");
+
+										//applications = new ArrayList<DesfireApplication>();
+
+										//DesfireApplication desfireApplication = new DesfireApplication();
+										//desfireApplication.setId(new byte[3]); // master application
+										//applications.add(desfireApplication);
 									}
-									System.out.println("*** get keySettings start");
+									//application = applications.get(0); // master application
+									System.out.println("*** application: " + application.toString());
+									System.out.println("*** application idString: " + application.getIdString());
+									System.out.println("*** application hasKeys: " + application.hasKeys());
+
+
 									DesfireApplicationKeySettings keySettings = application.getKeySettings();
 									Log.d(TAG, keySettings.toString());
-									System.out.println("*** get keySettings end");
-
-									//if(keySettings.isRequiresMasterKeyForDirectoryList()) { // authenticate in every case
-										final List<DesfireApplicationKey> keys = application.getKeys();
-									System.out.println("*** get key List end: " + keys);
-									if (keys != null) {
-										System.out.println("*** get key List end: " + keys.size());
-									}
-										final DesfireApplicationKey root = keys.get(0);
-									System.out.println("*** get root keys end");
-									System.out.println("*** DesfireApplicationKey root: " + root.toString());
-
-										showKeySelector(keySettings.getType(), new OnKeyListener() {
-											@Override
-											public void onKey(DesfireKey key) {
-												if(!isConnected()) {
-													Log.d(TAG, "Tag lost wanting to select application");
-													onTagLost();
-													return;
-												}
-												try {
-													DesfireApplicationKey clone = new DesfireApplicationKey(root.getIndex(), key);
-													if(authenticate(clone)) {
-														MainActivity.this.authenticatedKey = clone;
-														// todo run the code after auth here ?
-														showToast(R.string.applicationAuthenticatedSuccess);
-														int result = mifare_desfire_format_picc(tag);
-														showToastShortToast("formatting result (0 is OK): " + String.valueOf(result));
-													} else {
-														showToast(R.string.applicationAuthenticatedFail);
-													}
-
-												} catch (Exception e) {
-													Log.d(TAG, "Unable to authenticate", e);
+									//if(keySettings.isRequiresMasterKeyForDirectoryList()) {
+									final List<DesfireApplicationKey> keys = application.getKeys();
+									final DesfireApplicationKey root = keys.get(0);
+									showKeySelector(keySettings.getType(), new OnKeyListener() {
+										@Override
+										public void onKey(DesfireKey key) {
+											if(!isConnected()) {
+												Log.d(TAG, "Tag lost wanting to select application");
+												onTagLost();
+												return;
+											}
+											try {
+												DesfireApplicationKey clone = new DesfireApplicationKey(root.getIndex(), key);
+												if(authenticate(clone)) {
+													MainActivity.this.authenticatedKey = clone;
+													// todo run the code after auth here ?
+													//readApplicationFiles();
+													//showApplicationFragment();
+													int result = mifare_desfire_format_picc(tag);
+													showToastShortToast("formatting result (0 is OK): " + String.valueOf(result));
+													showToast(R.string.applicationAuthenticatedSuccess);
+												} else {
 													showToast(R.string.applicationAuthenticatedFail);
 												}
+
+											} catch (Exception e) {
+												Log.d(TAG, "Unable to authenticate", e);
+												showToast(R.string.applicationAuthenticatedFail);
 											}
-										});
+										}
+									});
+
+									int result = mifare_desfire_format_picc(tag);
+									showToastShortToast("formatting result (0 is OK): " + String.valueOf(result));
 								/*
 								} else {
 										//Log.d(TAG, "Can't authenticate an application");
