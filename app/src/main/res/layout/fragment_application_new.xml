@@ -348,7 +348,7 @@
                     app:np_orientation="horizontal"
                     app:np_selectedTextSize="20sp"
                     app:np_textSize="16sp"
-                    app:np_value="1"
+                    app:np_value="3"
                     app:np_width="180dp" />
             </LinearLayout>
 
