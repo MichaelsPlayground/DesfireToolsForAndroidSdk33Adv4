@@ -163,4 +163,5 @@
     <string name="freeMemory">free memory</string>
     <string name="formatPicc">format PICC</string>
     <string name="keyAddSamples">add sample keys</string>
+    <string name="applicationKeySettingsChange">change the Application Key Settings</string>
 </resources>

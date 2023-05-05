@@ -678,6 +678,25 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
 
         });
 
+        // added
+        // avoid to change the settings for master application
+        /*
+        if (application.getIdString().equals("000000")) {
+            newFragment.setButtonEnabled(false);
+        } else {
+            newFragment.setButtonEnabled(true);
+        }
+
+         */
+
+        newFragment.setOnButtonClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // this is for changing the application key settings
+                showApplicationKeySettingsChangeFragment();
+            }
+        });
+
         androidx.fragment.app.FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
 
         // Replace whatever is in the fragment_container view with this fragment,
@@ -1113,7 +1132,260 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
         transaction.addToBackStack("addFile");
         // Commit the transaction
         transaction.commit();
+    }
 
+    // added
+    private void showApplicationKeySettingsChangeFragment() {
+        Log.d(TAG, "showApplicationKeySettingsChangeFragment");
+
+        // Create new fragment and transaction
+        final ApplicationKeySettingsChangeFragment newFragment = new ApplicationKeySettingsChangeFragment(application);
+        //final FileNewFragment newFragment = new FileNewFragment(application);
+        //final FileListFragment newFragment = new FileListFragment();
+
+        //newFragment.setApplication(application);
+
+		/* new with AppCompatActivity
+		final ApplicationNewFragment newFragment = new ApplicationNewFragment();
+		Fragment fragment = new ApplicationNewFragment();
+		getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, selectedFragment).commit();
+		*/
+
+        newFragment.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                System.out.println("*** change application key settings pressed");
+
+                // get the data from FileNewFragment
+                // file number
+                com.shawnlin.numberpicker.NumberPicker pickerFid = newFragment.getNpFileId();
+                int fid = pickerFid.getValue();
+                byte fileNumber = (byte) (fid & 0xff);
+
+                // communication settings
+                AutoCompleteTextView communicationSettingsSpinner = newFragment.getChoiceCommunicationSettings();
+                String comChoice = communicationSettingsSpinner.getText().toString();
+                byte commSett = (byte) 0x03;
+                if (comChoice.equals("Plain")) {
+                    commSett = (byte) 0x00;
+                } else if (comChoice.equals("MACed")) {
+                    commSett = (byte) 0x01;
+                } else if (comChoice.equals("Encrypted")) {
+                    commSett = (byte) 0x03;
+                } else {
+                    newFragment.setLogData("unsupported communication setting");
+                    return;
+                }
+
+                // access rights
+                int nrOfKeysInApplication = newFragment.getNrOfApplicationKeys();
+                int keyForRw = newFragment.getNpKeyRw().getValue();
+                int keyForCar = newFragment.getNpKeyCar().getValue();
+                int keyForR = newFragment.getNpKeyR().getValue();
+                int keyForW = newFragment.getNpKeyW().getValue();
+                // sanity checks on key number
+                // todo special handling for key numbers 14 = free access rights without key and 15 = no rights necessary
+                if (keyForRw >= nrOfKeysInApplication) {
+                    newFragment.setLogData("key for RW is too large, maximum is " + (nrOfKeysInApplication - 1)); // as they are numbered from 00 to 15
+                    return;
+                }
+                if (keyForCar >= nrOfKeysInApplication) {
+                    newFragment.setLogData("key for CAR is too large, maximum is " + (nrOfKeysInApplication - 1)); // as they are numbered from 00 to 15
+                    return;
+                }
+                if (keyForR >= nrOfKeysInApplication) {
+                    newFragment.setLogData("key for Read is too large, maximum is " + (nrOfKeysInApplication - 1)); // as they are numbered from 00 to 15
+                    return;
+                }
+                if (keyForW >= nrOfKeysInApplication) {
+                    newFragment.setLogData("key for Write is too large, maximum is " + (nrOfKeysInApplication - 1)); // as they are numbered from 00 to 15
+                    return;
+                }
+                // get the new value
+                //int accessRights = (keyForRw * 4096) + (keyForCar * 256) + (keyForR * 16) + (keyForW * 1);
+                int accessRights = (keyForR * 4096) + (keyForW * 256) + (keyForRw * 16) + (keyForCar * 1);
+
+                // standard fileSize
+                int standardFileSize = Integer.parseInt(newFragment.getStandardFileSize().getText().toString());
+                if ((standardFileSize < 1) || (standardFileSize > 256)) {
+                    newFragment.setLogData("fileSize has to be in range of 1 to 256");
+                    return;
+                }
+
+                // record fileSize
+                int recordFileSize = Integer.parseInt(newFragment.getRecordFileSize().getText().toString());
+                if ((recordFileSize < 1) || (recordFileSize > 256)) {
+                    newFragment.setLogData("fileSize has to be in range of 1 to 256");
+                    return;
+                }
+
+                // number of records
+                int numberOfRecords = newFragment.getNpNrOfRecords().getValue();
+                if ((numberOfRecords < 1) || (numberOfRecords > 10)) {
+                    newFragment.setLogData("number of records has to be in range of 1 to 10");
+                    return;
+                }
+
+                // value file parameters
+                // lower limit
+                int lowerLimit = newFragment.getLowerLimit();
+                // upper limit
+                int upperLimit = newFragment.getUpperLimit();
+                // lower limit
+                int value = newFragment.getValue();
+                if (lowerLimit >= upperLimit) {
+                    newFragment.setLogData("the upper limit has to be higher than the lower limit");
+                    return;
+                }
+                if ((value >= lowerLimit) && (value <= upperLimit)) {
+                    // everything is ok, value is in range lower limit <= value <= upper limit
+                } else {
+                    newFragment.setLogData("the value has to be in range of lower limit to upper limit");
+                    return;
+                }
+
+                // select application
+                //public static int mifare_desfire_select_application (MifareTag tag, DesfireApplicationId aid) throws Exception
+                int selectApplicationResult = -99;
+                byte[] selectedAid = newFragment.getApplication().getId();
+                DesfireApplicationId desfireApplicationId = new DesfireApplicationId(selectedAid);
+                try {
+                    selectApplicationResult = mifare_desfire_select_application(tag, desfireApplicationId);
+                } catch (Exception e) {
+                    // throw new RuntimeException(e);
+                    newFragment.setLogData("selectApplication error: " + e.getMessage());
+                    return;
+                }
+                if (selectApplicationResult == 0) {
+                    newFragment.setLogData("selectApplication success");
+                } else {
+                    newFragment.setLogData("selectApplication failure: " + selectApplicationResult);
+                    return;
+                }
+
+                // how to authenticate for create a file ?
+                if (application == null) {
+                    System.out.println("application is null");
+
+                    //applications = new ArrayList<DesfireApplication>();
+
+                    //DesfireApplication desfireApplication = new DesfireApplication();
+                    //desfireApplication.setId(new byte[3]); // master application
+                    //applications.add(desfireApplication);
+                }
+                //application = applications.get(0); // master application
+                System.out.println("*** application: " + application.toString());
+                System.out.println("*** application idString: " + application.getIdString());
+                System.out.println("*** application hasKeys: " + application.hasKeys());
+
+
+                DesfireApplicationKeySettings keySettings = application.getKeySettings();
+                Log.d(TAG, keySettings.toString());
+                //if(keySettings.isRequiresMasterKeyForDirectoryList()) {
+                final List<DesfireApplicationKey> keys = application.getKeys();
+                final DesfireApplicationKey root = keys.get(0);
+                showKeySelector(keySettings.getType(), new OnKeyListener() {
+                    @Override
+                    public void onKey(DesfireKey key) {
+                        if (!isConnected()) {
+                            Log.d(TAG, "Tag lost wanting to select application");
+                            onTagLost();
+                            return;
+                        }
+                        try {
+                            DesfireApplicationKey clone = new DesfireApplicationKey(root.getIndex(), key);
+                            if (authenticate(clone)) {
+                                MainActivity.this.authenticatedKey = clone;
+                                // todo run the code after auth here ?
+                                //readApplicationFiles();
+                                //showApplicationFragment();
+
+                                showToast(R.string.applicationAuthenticatedSuccess);
+                                // this throws an exception on creating a new value file:
+                                // public static byte[] mifare_cryto_postprocess_data (MifareTag tag, byte[] data, int nbytes, int communication
+                                // in MifareDesfireCrypto.java
+                                // line 577
+
+
+                            } else {
+                                showToast(R.string.applicationAuthenticatedFail);
+                            }
+
+                        } catch (Exception e) {
+                            Log.d(TAG, "Unable to authenticate", e);
+                            showToast(R.string.applicationAuthenticatedFail);
+                        }
+                    }
+                });
+
+// line 628
+                // public static int
+
+                // mifare_desfire_create_std_data_file (MifareTag tag, byte file_no, byte communication_settings, int access_rights, int file_size) throws Exception
+
+
+                //byte communicationSettings = (byte) 0x03;
+				/*
+				if (communicationSetting == CommunicationSetting.Plain) communicationSettings = (byte) 0x00;
+        		if (communicationSetting == CommunicationSetting.MACed) communicationSettings = (byte) 0x01;
+        		if (communicationSetting == CommunicationSetting.Encrypted) communicationSettings = (byte) 0x03;
+				 */
+                //int accessRights = 18; // 0x00 0x12 = Read&Write Access & ChangeAccessRights | Read Access & Write Access
+
+
+                // for value file
+                //mifare_desfire_create_value_file (MifareTag tag, byte file_no, byte communication_settings, short access_rights,
+                // int lower_limit, int upper_limit, int value, byte limited_credit_enable) throws Exception
+
+                // for cyclic file:
+                // mifare_desfire_create_cyclic_record_file (MifareTag tag, byte file_no, byte communication_settings, short access_rights,
+                // int record_size, int max_number_of_records) throws Exception
+
+
+                int result = -99;
+                try {
+                    // the chosen method depends on the type file to be created
+                    if (newFragment.isRbStandardChecked()) {
+                        Log.d(TAG, "create a standard file");
+                        result = mifare_desfire_create_std_data_file(tag, fileNumber, commSett, accessRights, standardFileSize);
+                    } else if (newFragment.isRbValueChecked()) {
+                        Log.d(TAG, "create a value file");
+                        System.out.println("*** create a value file with initial value " + value);
+                        // limited credit is disabled
+                        result = mifare_desfire_create_value_file(tag, fileNumber, commSett, (short) accessRights, lowerLimit, upperLimit, value, (byte) (0x00));
+                        System.out.println("create value file result: " + result);
+                    } else if (newFragment.isRbRecordChecked()) {
+                        Log.d(TAG, "create a linear record file");
+                        System.out.println("*** create a linear record file recordSize " + recordFileSize + " numberOfRecords " + numberOfRecords);
+                        result = mifare_desfire_create_linear_record_file(tag, fileNumber, commSett, accessRights, recordFileSize, numberOfRecords);
+                    } else if (newFragment.isRbCyclicChecked()) {
+                        Log.d(TAG, "create a cyclic record file");
+                        System.out.println("*** create a cyclic file recordSize " + recordFileSize + " numberOfRecords " + numberOfRecords);
+                        result = mifare_desfire_create_cyclic_record_file(tag, fileNumber, commSett, accessRights, recordFileSize, numberOfRecords);
+
+                    }
+                } catch (Exception e) {
+                    //throw new RuntimeException(e);
+                    newFragment.setLogData("createFile error: " + e.getMessage());
+                    return;
+                }
+                if (result == 0) {
+                    newFragment.setLogData("createFile success");
+                } else {
+                    newFragment.setLogData("createFile failure: " + result);
+                    return;
+                }
+            }
+        });
+
+        //FragmentTransaction transaction = getFragmentManager().beginTransaction();
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        // Replace whatever is in the fragment_container view with this fragment,
+        // and add the transaction to the back stack
+        transaction.replace(R.id.content, newFragment, "changeApplicationKeySettings");
+        transaction.addToBackStack("changeApplicationKeySettings");
+        // Commit the transaction
+        transaction.commit();
     }
 
 

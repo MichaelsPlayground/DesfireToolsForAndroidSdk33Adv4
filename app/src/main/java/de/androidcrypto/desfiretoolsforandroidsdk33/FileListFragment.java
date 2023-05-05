@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.Button;
 import android.widget.ListView;
 
 import androidx.annotation.NonNull;
@@ -64,10 +65,13 @@ public class FileListFragment extends Fragment {
 	}
 
 	private DesfireApplication application;
-	
+
 	private ListView listView;
 	
 	private OnItemClickListener listener;
+
+	private Button changeApplicationSettings; // added
+	private View.OnClickListener buttonListener; // added
 	
 	private FileListItemAdapter adapter;
 
@@ -94,6 +98,8 @@ public class FileListFragment extends Fragment {
 
 		listView = (ListView)view.findViewById(R.id.listView);
 		listView.setOnItemClickListener(listener);
+		changeApplicationSettings = view.findViewById(R.id.btnChangeApplicationSettings);
+		changeApplicationSettings.setOnClickListener(buttonListener);
 		init(view, getActivity());
 	}
 
@@ -237,5 +243,8 @@ public class FileListFragment extends Fragment {
 	public void setOnItemClickListener(OnItemClickListener listener) {
 		this.listener = listener;
 	}
+
+	public void setOnButtonClickListener(View.OnClickListener buttonListener) {this.buttonListener = buttonListener; } // added
+	public void setButtonEnabled(boolean buttonEnabled) {this.changeApplicationSettings.setEnabled(buttonEnabled);}
 
 }
