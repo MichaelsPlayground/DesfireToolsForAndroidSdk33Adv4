@@ -28,7 +28,7 @@ public class ApplicationKeyChangeFragment extends Fragment {
 	// todo block file creation if application id = 00 00 00 = master file application
 
 	private NumberPicker npFileId, npKeyRw, npKeyCar, npKeyR, npKeyW, npNrOfRecords;
-	private EditText changeKeySettingsAid, changeKeySettingsExisting, changeKeySettingsChanged, maximumNumberOfKeys;
+	private EditText changeKeyAid, changeKeySettingsExisting, changeKeySettingsChanged, maximumNumberOfKeys;
 	private EditText keyUsedForCar;
 	private CheckBox cbBit0MasterKeyIsChangeable, cbBit1MasterKeyAuthenticationNeededDirListing, cbBit2MasterKeyAuthenticationNeededCreateDelete, cbBit3MasterKeySettingsChangeAllowed;
 	private boolean bit0New, bit1New, bit2New, bit3New;
@@ -60,7 +60,7 @@ public class ApplicationKeyChangeFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_application_key_change, container, false);
 
-		changeKeySettingsAid = view.findViewById(R.id.etKeySettingsAid);
+		changeKeyAid = view.findViewById(R.id.etKeyChangingAid);
 		changeKeySettingsExisting = view.findViewById(R.id.etKeySettingsExisting);
 		changeKeySettingsChanged = view.findViewById(R.id.etKeySettingsChanged);
 		cbBit0MasterKeyIsChangeable = view.findViewById(R.id.cbBit0MasterKeyIsChangeable);
@@ -72,7 +72,7 @@ public class ApplicationKeyChangeFragment extends Fragment {
 		doChangeKeySettings = view.findViewById(R.id.btnDoChangeApplicationKeySettings);
 		logData = view.findViewById(R.id.tvLog);
 
-		changeKeySettingsAid.setText(application.getIdString());
+		changeKeyAid.setText(application.getIdString());
 
 		// get the existing key settings
 		DesfireApplicationKeySettings existingKeySettings = application.getKeySettings();
