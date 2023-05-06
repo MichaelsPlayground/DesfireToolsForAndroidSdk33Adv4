@@ -32,10 +32,10 @@ As a new key in an application is a key filled with 0x00's there are 4 Null/Defa
 0's only.
 
 Using the menu you create **4 AES keys** named for their purpose:
--AES 0 RW: should be used as key for "Read & Write" access
--AES 1 CAR: should be used as key for "Change Access Rights"
--AES 2 R: should be used as key for "Read" access
--AES 3 W: should be used as key for "Write" access
+- AES 0 RW: should be used as key for "Read & Write" access
+- AES 1 CAR: should be used as key for "Change Access Rights"
+- AES 2 R: should be used as key for "Read" access
+- AES 3 W: should be used as key for "Write" access
 
 
 
