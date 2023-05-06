@@ -1,17 +1,11 @@
 package de.androidcrypto.desfiretoolsforandroidsdk33;
 
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.Button;
 import android.widget.ListView;
 
 import androidx.annotation.NonNull;
@@ -25,6 +19,11 @@ import com.github.skjolber.desfire.ev1.model.file.RecordDesfireFile;
 import com.github.skjolber.desfire.ev1.model.file.StandardDesfireFile;
 import com.github.skjolber.desfire.ev1.model.file.ValueDesfireFile;
 
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import de.androidcrypto.desfiretoolsforandroidsdk33.filelist.ApplicationDetail;
 import de.androidcrypto.desfiretoolsforandroidsdk33.filelist.ApplicationDetailAccessKey;
 import de.androidcrypto.desfiretoolsforandroidsdk33.filelist.ApplicationDetailHeader;
@@ -32,7 +31,7 @@ import de.androidcrypto.desfiretoolsforandroidsdk33.filelist.ApplicationDetailRe
 import de.androidcrypto.desfiretoolsforandroidsdk33.filelist.ApplicationDetailSetting;
 
 
-public class FileFragment extends Fragment {
+public class FileFragmentV1 extends Fragment {
 
 	// TODO: Rename parameter arguments, choose names that match
 	// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -44,7 +43,7 @@ public class FileFragment extends Fragment {
 	private String mParam1;
 	private String mParam2;
 
-	public FileFragment() {
+	public FileFragmentV1() {
 		// Required empty public constructor
 	}
 
@@ -57,8 +56,8 @@ public class FileFragment extends Fragment {
 	 * @return A new instance of fragment ReceiveFragment.
 	 */
 	// TODO: Rename and change types and number of parameters
-	public static FileFragment newInstance(String param1, String param2) {
-		FileFragment fragment = new FileFragment();
+	public static FileFragmentV1 newInstance(String param1, String param2) {
+		FileFragmentV1 fragment = new FileFragmentV1();
 		Bundle args = new Bundle();
 		args.putString(ARG_PARAM1, param1);
 		args.putString(ARG_PARAM2, param2);
@@ -69,8 +68,6 @@ public class FileFragment extends Fragment {
 	private DesfireFile file;
 	
 	private ListView listView;
-	private Button writeToFile; // added
-	private View.OnClickListener buttonListener; // added
 	
 	private OnItemClickListener listener;
 	
@@ -99,8 +96,6 @@ public class FileFragment extends Fragment {
 
 		listView = (ListView)view.findViewById(R.id.listView);
 		listView.setOnItemClickListener(listener);
-		writeToFile = view.findViewById(R.id.btnWriteToFile);
-		writeToFile.setOnClickListener(buttonListener);
 		init(view, getActivity());
 	}
 	
@@ -241,10 +236,6 @@ public class FileFragment extends Fragment {
 	public void setOnItemClickListener(OnItemClickListener listener) {
 		this.listener = listener;
 	}
-
-	public void setButtonClickListener(View.OnClickListener buttonListener) {
-		this.buttonListener = buttonListener;
-	} // added
 
 	private String translateAccessKey(int key, Context context) {
 		if(key == 14) {
