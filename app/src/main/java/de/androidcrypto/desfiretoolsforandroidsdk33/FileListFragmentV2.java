@@ -1,9 +1,5 @@
 package de.androidcrypto.desfiretoolsforandroidsdk33;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-
 import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -24,13 +20,17 @@ import com.github.skjolber.desfire.ev1.model.DesfireApplicationKeySettings;
 import com.github.skjolber.desfire.ev1.model.file.DesfireFile;
 import com.github.skjolber.desfire.ev1.model.key.DesfireKey;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+
 import de.androidcrypto.desfiretoolsforandroidsdk33.filelist.ApplicationDetail;
 import de.androidcrypto.desfiretoolsforandroidsdk33.filelist.ApplicationDetailApplicationKey;
 import de.androidcrypto.desfiretoolsforandroidsdk33.filelist.ApplicationDetailFile;
 import de.androidcrypto.desfiretoolsforandroidsdk33.filelist.ApplicationDetailHeader;
 import de.androidcrypto.desfiretoolsforandroidsdk33.filelist.ApplicationDetailSetting;
 
-public class FileListFragment extends Fragment {
+public class FileListFragmentV2 extends Fragment {
 
 	// TODO: Rename parameter arguments, choose names that match
 	// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -42,7 +42,7 @@ public class FileListFragment extends Fragment {
 	private String mParam1;
 	private String mParam2;
 
-	public FileListFragment() {
+	public FileListFragmentV2() {
 		// Required empty public constructor
 	}
 
@@ -55,8 +55,8 @@ public class FileListFragment extends Fragment {
 	 * @return A new instance of fragment ReceiveFragment.
 	 */
 	// TODO: Rename and change types and number of parameters
-	public static FileListFragment newInstance(String param1, String param2) {
-		FileListFragment fragment = new FileListFragment();
+	public static FileListFragmentV2 newInstance(String param1, String param2) {
+		FileListFragmentV2 fragment = new FileListFragmentV2();
 		Bundle args = new Bundle();
 		args.putString(ARG_PARAM1, param1);
 		args.putString(ARG_PARAM2, param2);
@@ -72,9 +72,6 @@ public class FileListFragment extends Fragment {
 
 	private Button changeApplicationSettings; // added
 	private View.OnClickListener buttonListener; // added
-
-	private Button changeApplicationKey; // added
-	private View.OnClickListener buttonChangeKeyListener; // added
 	
 	private FileListItemAdapter adapter;
 
@@ -103,9 +100,6 @@ public class FileListFragment extends Fragment {
 		listView.setOnItemClickListener(listener);
 		changeApplicationSettings = view.findViewById(R.id.btnChangeApplicationSettings);
 		changeApplicationSettings.setOnClickListener(buttonListener);
-		changeApplicationKey = view.findViewById(R.id.btnChangeApplicationKey);
-		changeApplicationKey.setOnClickListener(buttonChangeKeyListener);
-
 		init(view, getActivity());
 	}
 
@@ -250,8 +244,7 @@ public class FileListFragment extends Fragment {
 		this.listener = listener;
 	}
 
-	public void setOnButtonClickListener(View.OnClickListener buttonListener) {this.buttonListener = buttonListener; } // added for change ApplicationKeySettings
-	public void setOnChangeKeyButtonClickListener(View.OnClickListener changeKeyButtonListener) {this.buttonChangeKeyListener = changeKeyButtonListener; } // added for change ApplicationKey
+	public void setOnButtonClickListener(View.OnClickListener buttonListener) {this.buttonListener = buttonListener; } // added
 	public void setButtonEnabled(boolean buttonEnabled) {this.changeApplicationSettings.setEnabled(buttonEnabled);}
 
 }

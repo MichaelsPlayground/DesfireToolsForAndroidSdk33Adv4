@@ -16,6 +16,13 @@
 		android:layout_gravity="center_horizontal"
 		android:text="change application settings" />
 
+	<Button
+		android:id="@+id/btnChangeApplicationKey"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_gravity="center_horizontal"
+		android:text="change application key" />
+
 	<ListView
 	        android:id="@+id/listView"
 	        android:layout_width="fill_parent"

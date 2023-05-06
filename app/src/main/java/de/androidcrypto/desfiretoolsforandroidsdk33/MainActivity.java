@@ -712,6 +712,14 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
             }
         });
 
+        newFragment.setOnChangeKeyButtonClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // this is for changing the application key settings
+                showApplicationKeyChangeFragment();
+            }
+        });
+
         androidx.fragment.app.FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
 
         // Replace whatever is in the fragment_container view with this fragment,
@@ -1217,6 +1225,133 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
         // and add the transaction to the back stack
         transaction.replace(R.id.content, newFragment, "changeApplicationKeySettings");
         transaction.addToBackStack("changeApplicationKeySettings");
+        // Commit the transaction
+        transaction.commit();
+    }
+
+    // added
+    private void showApplicationKeyChangeFragment() {
+        Log.d(TAG, "showApplicationKeyChangeFragment");
+
+        // Create new fragment and transaction
+        final ApplicationKeyChangeFragment newFragment = new ApplicationKeyChangeFragment(application);
+        System.out.println("*** applicationID: " + Utils.getHexString(application.getId()));
+        System.out.println("*** Master    AID: " + Utils.getHexString(MASTER_APPLICATION_ID));
+        if (!Arrays.equals(application.getId(), MASTER_APPLICATION_ID)) {
+            newFragment.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    System.out.println("*** change application key pressed");
+
+                    // 1 we do need to know the key number to get changed
+                    // 2 get the old key value from store
+                    // 3 get the new key from store
+                    // 4 authenticate with the old key
+                    // 5 send the change key command to PICC
+                    Log.d(TAG, "change app key workflow");
+                    boolean appHasKeys = application.hasKeys();
+                    Log.d(TAG, "application has keys: " + appHasKeys);
+                    if (appHasKeys = false) {
+                        newFragment.setLogData("the application has no keys, aborted");
+                        return;
+                    }
+
+                    List<DesfireApplicationKey> appKeys = application.getKeys();
+                    int appNumberOfKeys = appKeys.size();
+                    Log.d(TAG, "appNumberOfKeys: " + appNumberOfKeys);
+
+                    // here I am choosing key 1
+                    Log.d(TAG, "fixed to use key 1");
+                    DesfireApplicationKey appKey1 = appKeys.get(1);
+                    int appKey1Index = appKey1.getIndex();
+                    Log.d(TAG, "appKey1Index: " + appKey1Index);
+                    DesfireKey appKey1DesfireKey = appKey1.getDesfireKey();
+                    String appKey1DesfireKeyName = appKey1DesfireKey.getName();
+                    Log.d(TAG, "appKey1DesfireKeyName: " + appKey1DesfireKeyName);
+                    String appKey1DesfireKeyType = appKey1DesfireKey.getType().name();
+                    Log.d(TAG, "appKey1DesfireKeyType: " + appKey1DesfireKeyType);
+
+                    showKeySelector(appKey1DesfireKey.getType(), new OnKeyListener() {
+
+                        @Override
+                        public void onKey(DesfireKey key) {
+                            if (!isConnected()) {
+                                Log.d(TAG, "Tag lost wanting to select a key");
+                                onTagLost();
+                                return;
+                            }
+                            try {
+                                Log.d(TAG, "keySelector OLD key " + key.toString() + " data: " + Utils.getHexString(key.toBytes()));
+                                showToastShortToast("keySelector key " + key.toString() + " data: " + Utils.getHexString(key.toBytes()));
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
+
+                        }
+                    });
+
+
+
+                    if (tag != null) return;
+
+                    // get the data from ApplicationKeyChangeFragment
+                    byte newKeySettings = newFragment.getKeySettingsChanged();
+
+                    // to authenticate for change key settings we need to use the key number placed in key settings
+                    int carKeyNumber = newFragment.getKeyNumberForAccessRightChangeExisting();
+
+                    Log.d(TAG, "request to use car key " + carKeyNumber + " for change Application Key Settings to " + newKeySettings);
+
+                    DesfireApplicationKeySettings keySettings = application.getKeySettings();
+                    Log.d(TAG, keySettings.toString());
+                    //if(keySettings.isRequiresMasterKeyForDirectoryList()) {
+                    final List<DesfireApplicationKey> keys = application.getKeys();
+                    final DesfireApplicationKey root = keys.get(carKeyNumber);
+                    showKeySelector(keySettings.getType(), new OnKeyListener() {
+                        @Override
+                        public void onKey(DesfireKey key) {
+                            if (!isConnected()) {
+                                Log.d(TAG, "Tag lost wanting to select application");
+                                onTagLost();
+                                return;
+                            }
+                            try {
+                                DesfireApplicationKey clone = new DesfireApplicationKey(root.getIndex(), key);
+                                if (authenticate(clone)) {
+                                    MainActivity.this.authenticatedKey = clone;
+
+                                    showToast(R.string.applicationAuthenticatedSuccess);
+
+                                    // mifare_desfire_change_key (MifareTag tag, byte key_no, MifareDESFireKey new_key, MifareDESFireKey old_key) throws Exception
+
+
+
+                                    int result = mifare_desfire_change_key_settings(tag, newKeySettings);
+                                    showToastShortToast("change application key settings result: " + result);
+                                    newFragment.setLogData("change application key settings result: " + result);
+
+
+                                } else {
+                                    showToast(R.string.applicationAuthenticatedFail);
+                                }
+
+                            } catch (Exception e) {
+                                Log.d(TAG, "Unable to authenticate", e);
+                                showToast(R.string.applicationAuthenticatedFail);
+                            }
+                        }
+                    });
+
+                }
+            });
+        }
+
+        //FragmentTransaction transaction = getFragmentManager().beginTransaction();
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        // Replace whatever is in the fragment_container view with this fragment,
+        // and add the transaction to the back stack
+        transaction.replace(R.id.content, newFragment, "changeApplicationKey");
+        transaction.addToBackStack("changeApplicationKey");
         // Commit the transaction
         transaction.commit();
     }
