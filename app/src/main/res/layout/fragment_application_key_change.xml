@@ -97,7 +97,6 @@
                     android:layout_height="wrap_content"
                     android:ellipsize="end"
                     android:focusable="false"
-                    android:inputType="number"
                     android:text=""
                     tools:ignore="KeyboardInaccessibleWidget" />
             </com.google.android.material.textfield.TextInputLayout>
@@ -141,7 +140,6 @@
                     android:layout_height="wrap_content"
                     android:ellipsize="end"
                     android:focusable="false"
-                    android:inputType="number"
                     android:text=""
                     tools:ignore="KeyboardInaccessibleWidget" />
             </com.google.android.material.textfield.TextInputLayout>
@@ -160,6 +158,22 @@
                 android:layout_marginBottom="8dp"
                 app:dividerInsetEnd="16dp"
                 app:dividerInsetStart="16dp"
+                app:dividerThickness="4dp" />
+
+            <Button
+                android:id="@+id/btnDoChangeKey"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:text="change the key" />
+
+            <com.google.android.material.divider.MaterialDivider
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"
+                app:dividerInsetEnd="8dp"
+                app:dividerInsetStart="8dp"
                 app:dividerThickness="4dp" />
 
             <com.google.android.material.textfield.TextInputLayout
@@ -348,21 +362,7 @@
                 app:dividerInsetStart="8dp"
                 app:dividerThickness="4dp" />
 
-            <Button
-                android:id="@+id/btnDoChangeApplicationKeySettings"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:text="change the key" />
 
-            <com.google.android.material.divider.MaterialDivider
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:layout_marginBottom="8dp"
-                app:dividerInsetEnd="8dp"
-                app:dividerInsetStart="8dp"
-                app:dividerThickness="4dp" />
 
             <TextView
                 android:layout_width="wrap_content"

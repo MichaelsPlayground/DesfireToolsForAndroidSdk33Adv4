@@ -21,6 +21,7 @@ import com.github.skjolber.desfire.ev1.model.VersionInfo;
 import com.github.skjolber.desfire.ev1.model.command.DefaultIsoDepAdapter;
 import com.github.skjolber.desfire.ev1.model.command.Utils;
 import com.github.skjolber.desfire.ev1.model.file.DesfireFile;
+import com.github.skjolber.desfire.ev1.model.key.DesfireKey;
 import com.github.skjolber.desfire.ev1.model.key.DesfireKeyType;
 
 import android.util.Log;
@@ -649,6 +650,132 @@ public class MifareDesfire {
 	    }
 
 	    return 0;
+	}
+
+	public static int
+	mifare_desfire_change_key (MifareTag tag, byte key_no, DesfireKey new_key, DesfireKey old_key) throws Exception
+	{
+		ASSERT_ACTIVE (tag);
+		ASSERT_MIFARE_DESFIRE (tag);
+		ASSERT_AUTHENTICATED (tag);
+
+		byte[] cmd = new byte[52];
+
+		//ByteBuffer cmd = BUFFER_INIT (52);
+
+		// BUFFER_INIT (res, 1 + CMAC_LENGTH);
+
+		key_no &= 0x0F;
+
+		// Because new crypto methods can be setup only at application creation,
+		// changing the card master key to one of them require a key_no tweak.
+		//
+		if (0x000000 == C.MIFARE_DESFIRE (tag).getSelectedApplication()) {
+			switch (new_key.getType()) {
+				case DES:
+				case TDES:
+					break;
+				case TKTDES:
+					key_no |= 0x40;
+					break;
+				case AES:
+					key_no |= 0x80;
+					break;
+			}
+		}
+
+		int count = 0;
+
+		cmd[count++] = (byte) 0xC4;
+		cmd[count++] = key_no;
+
+		int new_key_length;
+		switch (new_key.getType()) {
+			case DES:
+			case TDES:
+			case AES:
+				new_key_length = 16;
+				break;
+			case TKTDES:
+				new_key_length = 24;
+				break;
+			default : {
+				throw new IllegalArgumentException();
+			}
+		}
+
+		System.arraycopy(new_key.getValue(), 0, cmd, count, new_key_length);
+		count += new_key_length;
+
+		//cmd.put(new_key.getData(), 0, new_key_length)
+		//memcpy (cmd, 2, new_key.getData(), new_key_length);
+
+		if ((C.MIFARE_DESFIRE (tag).getAuthenticatedKeyNo() & 0x0f) != (key_no & 0x0f)) {
+			if (old_key != null) {
+				for (int n = 0; n < new_key_length; n++) {
+					cmd[count + n] ^= old_key.getValue()[n];
+				}
+			}
+		}
+
+		// 2 + new_key_length + new_key_length
+		//__cmd_n += new_key_length;
+
+		if (new_key.getType() == DesfireKeyType.AES) {
+			cmd[count++] = (byte)(new_key.getVersion() & 0xff);
+		}
+
+		if ((C.MIFARE_DESFIRE (tag).getAuthenticatedKeyNo() & 0x0f) != (key_no & 0x0f)) {
+			switch (C.MIFARE_DESFIRE (tag).getAuthenticationScheme()) {
+				case AS_LEGACY:
+					ISO14443.iso14443a_crc_append (cmd, 2, count - 2);
+					count += 2;
+					ISO14443.iso14443a_crc (new_key.getValue(), 0, new_key_length, cmd, count);
+					count += 2;
+					break;
+				case AS_NEW:
+					MifareDesfireCrypto.desfire_crc32_append (cmd, count);
+					count += 4;
+
+					MifareDesfireCrypto.desfire_crc32 (new_key.getValue(), new_key_length, cmd, count);
+					count += 4;
+					break;
+			}
+		} else {
+			switch (C.MIFARE_DESFIRE (tag).getAuthenticationScheme()) {
+				case AS_LEGACY:
+					ISO14443.iso14443a_crc_append (cmd, 2, count - 2);
+					count += 2;
+					break;
+				case AS_NEW:
+					MifareDesfireCrypto.desfire_crc32_append (cmd, count);
+					count += 4;
+					break;
+			}
+		}
+
+		byte[] p = MifareDesfireCrypto.mifare_cryto_preprocess_data (tag, cmd, 0, count, 2, MifareDesfireCrypto.MDCM_ENCIPHERED | MifareDesfireCrypto.ENC_COMMAND | MifareDesfireCrypto.NO_CRC);
+
+		byte[] res = DESFIRE_TRANSCEIVE2 (tag, p);
+
+		// empty response really
+
+		byte[] buffer = new byte[1 + CMAC_LENGTH];
+		System.arraycopy(res, 0, buffer, 0, res.length);
+
+		p = MifareDesfireCrypto.mifare_cryto_postprocess_data (tag, buffer, res.length + 1, MifareDesfireCrypto.MDCM_PLAIN | MifareDesfireCrypto.CMAC_COMMAND | MifareDesfireCrypto.CMAC_VERIFY);
+
+		if (p == null) {
+			return -1;
+		}
+
+		// If we changed the current authenticated key, we are not authenticated
+		// anymore.
+		if (key_no == C.MIFARE_DESFIRE (tag).getAuthenticatedKeyNo()) {
+			C.MIFARE_DESFIRE (tag).setSessionKey(null);
+		}
+
+		return 0;
 	}
 
 	 // Retrieve version information for a given key.

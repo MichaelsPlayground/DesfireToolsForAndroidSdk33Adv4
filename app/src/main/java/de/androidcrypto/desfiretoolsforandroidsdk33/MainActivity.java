@@ -1238,7 +1238,7 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
         System.out.println("*** applicationID: " + Utils.getHexString(application.getId()));
         System.out.println("*** Master    AID: " + Utils.getHexString(MASTER_APPLICATION_ID));
         if (!Arrays.equals(application.getId(), MASTER_APPLICATION_ID)) {
-            newFragment.setOnClickListener(new View.OnClickListener() {
+            newFragment.setButtonListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     System.out.println("*** change application key pressed");
@@ -1248,65 +1248,49 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
                     // 3 get the new key from store
                     // 4 authenticate with the old key
                     // 5 send the change key command to PICC
-                    Log.d(TAG, "change app key workflow");
-                    boolean appHasKeys = application.hasKeys();
-                    Log.d(TAG, "application has keys: " + appHasKeys);
-                    if (appHasKeys = false) {
-                        newFragment.setLogData("the application has no keys, aborted");
+                    System.out.println("*** newKey: " + newFragment.getChangeKeyNewKey());
+                    DesfireKey desfireOldKey = newFragment.getOldDesfireKeyForChanging();
+                    DesfireKey desfireNewKey = newFragment.getNewDesfireKeyForChanging();
+                    if (desfireOldKey == null) {
+                        newFragment.setLogData("Please select the old key");
+                        return;
+                    }
+                    if (desfireNewKey == null)  {
+                        newFragment.setLogData("Please select the new key");
                         return;
                     }
 
-                    List<DesfireApplicationKey> appKeys = application.getKeys();
-                    int appNumberOfKeys = appKeys.size();
-                    Log.d(TAG, "appNumberOfKeys: " + appNumberOfKeys);
-
-                    // here I am choosing key 1
-                    Log.d(TAG, "fixed to use key 1");
-                    DesfireApplicationKey appKey1 = appKeys.get(1);
-                    int appKey1Index = appKey1.getIndex();
-                    Log.d(TAG, "appKey1Index: " + appKey1Index);
-                    DesfireKey appKey1DesfireKey = appKey1.getDesfireKey();
-                    String appKey1DesfireKeyName = appKey1DesfireKey.getName();
-                    Log.d(TAG, "appKey1DesfireKeyName: " + appKey1DesfireKeyName);
-                    String appKey1DesfireKeyType = appKey1DesfireKey.getType().name();
-                    Log.d(TAG, "appKey1DesfireKeyType: " + appKey1DesfireKeyType);
-
-                    showKeySelector(appKey1DesfireKey.getType(), new OnKeyListener() {
-
-                        @Override
-                        public void onKey(DesfireKey key) {
-                            if (!isConnected()) {
-                                Log.d(TAG, "Tag lost wanting to select a key");
-                                onTagLost();
-                                return;
-                            }
-                            try {
-                                Log.d(TAG, "keySelector OLD key " + key.toString() + " data: " + Utils.getHexString(key.toBytes()));
-                                showToastShortToast("keySelector key " + key.toString() + " data: " + Utils.getHexString(key.toBytes()));
-                            } catch (IOException e) {
-                                throw new RuntimeException(e);
-                            }
-
-                        }
-                    });
-
-
-
-                    if (tag != null) return;
-
-                    // get the data from ApplicationKeyChangeFragment
-                    byte newKeySettings = newFragment.getKeySettingsChanged();
-
-                    // to authenticate for change key settings we need to use the key number placed in key settings
-                    int carKeyNumber = newFragment.getKeyNumberForAccessRightChangeExisting();
-
-                    Log.d(TAG, "request to use car key " + carKeyNumber + " for change Application Key Settings to " + newKeySettings);
+                    byte[] oldKey = hexStringToByteArray(newFragment.getChangeKeyOldKey());
+                    byte[] newKey = hexStringToByteArray(newFragment.getChangeKeyNewKey());
+                    if (oldKey == null) {
+                        newFragment.setLogData("Please select the old key");
+                        return;
+                    }
+                    if (newKey == null)  {
+                        newFragment.setLogData("Please select the new key");
+                        return;
+                    }
+                    //byte[] oldKey = newFragment.getOldKeyForChanging();
+                    //byte[] newKey = newFragment.getNewKeyForChanging();
+                    byte keyNumberForChanging = newFragment.getKeyNumberForChanging();
+                    Log.d(TAG, "keyNumberForChanging: " + keyNumberForChanging);
+                    // todo selectKey return MifareDesfireKey and not byte[]
+                    /*
+                    MifareDESFireKey desfireOldKey = new MifareDESFireKey();
+                    desfireOldKey.setVersion((byte) 0);
+                    desfireOldKey.setAESVersion((byte) 0);
+                    desfireOldKey.setData(oldKey);
+                    MifareDESFireKey desfireNewKey = new MifareDESFireKey();
+                    desfireNewKey.setVersion((byte) 0);
+                    desfireNewKey.setAESVersion((byte) 0);
+                    desfireNewKey.setData(newKey);
+                     */
 
                     DesfireApplicationKeySettings keySettings = application.getKeySettings();
                     Log.d(TAG, keySettings.toString());
                     //if(keySettings.isRequiresMasterKeyForDirectoryList()) {
                     final List<DesfireApplicationKey> keys = application.getKeys();
-                    final DesfireApplicationKey root = keys.get(carKeyNumber);
+                    final DesfireApplicationKey root = keys.get(0);
                     showKeySelector(keySettings.getType(), new OnKeyListener() {
                         @Override
                         public void onKey(DesfireKey key) {
@@ -1319,17 +1303,19 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
                                 DesfireApplicationKey clone = new DesfireApplicationKey(root.getIndex(), key);
                                 if (authenticate(clone)) {
                                     MainActivity.this.authenticatedKey = clone;
+                                    // todo run the code after auth here ?
+                                    //readApplicationFiles();
+                                    //showApplicationFragment();
 
                                     showToast(R.string.applicationAuthenticatedSuccess);
 
-                                    // mifare_desfire_change_key (MifareTag tag, byte key_no, MifareDESFireKey new_key, MifareDESFireKey old_key) throws Exception
-
-
-
-                                    int result = mifare_desfire_change_key_settings(tag, newKeySettings);
-                                    showToastShortToast("change application key settings result: " + result);
-                                    newFragment.setLogData("change application key settings result: " + result);
-
+                                    try {
+                                        int result = mifare_desfire_change_key(tag, keyNumberForChanging, desfireNewKey, desfireOldKey);
+                                        newFragment.setLogData("change key result: " + result);
+                                    } catch (Exception e) {
+                                        newFragment.setLogData("Error on change key: " + e.getMessage());
+                                        e.printStackTrace();
+                                    }
 
                                 } else {
                                     showToast(R.string.applicationAuthenticatedFail);
@@ -1341,6 +1327,11 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
                             }
                         }
                     });
+
+
+
+
+
 
                 }
             });
@@ -2375,6 +2366,16 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
             }
             return sb.toString();
         }
+    }
+
+    public static byte[] hexStringToByteArray(String s) {
+        int len = s.length();
+        byte[] data = new byte[len / 2];
+        for (int i = 0; i < len; i += 2) {
+            data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
+                    + Character.digit(s.charAt(i + 1), 16));
+        }
+        return data;
     }
 
     @Override
