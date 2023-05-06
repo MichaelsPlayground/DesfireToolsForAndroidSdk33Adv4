@@ -21,6 +21,24 @@ new file name.
 Second note: I included the "libfreefare" and "model" libraries direct into my package so they are no included within 
 the build.gradle (app) file.
 
+## Status of this app
+
+### Key management module
+
+This module stores keys needed for authentication. There are 4 key types available: DES (8 bytes long), 
+3DES (Triple DES key with 16 bytes length), 3K3DES (Triple DES key with 24 bytes length) and AES (AES-128, 16 bytes long).
+
+As a new key in an application is a key filled with 0x00's there are 4 Null/Default keys that are of 
+0's only.
+
+Using the menu you create **4 AES keys** named for their purpose:
+-AES 0 RW: should be used as key for "Read & Write" access
+-AES 1 CAR: should be used as key for "Change Access Rights"
+-AES 2 R: should be used as key for "Read" access
+-AES 3 W: should be used as key for "Write" access
+
+
+
 ## The original description follows...
 
 The original app in Google PlayStore: https://play.google.com/store/apps/details?id=com.skjolberg.mifare.desfiretool&hl=no
