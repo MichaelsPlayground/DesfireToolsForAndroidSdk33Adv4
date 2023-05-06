@@ -165,4 +165,5 @@
     <string name="keyAddSamples">add sample keys</string>
     <string name="applicationKeySettingsChange">change the Application Key Settings</string>
     <string name="fileWrite">write to this file</string>
+    <string name="fileWriteInformation">Note: this app supports to write a string to a standard, linear record and cyclic record file only.\n\nYou need to tap the tag to the reader again to see that data is written (otherwise you see the old = cached data).</string>
 </resources>

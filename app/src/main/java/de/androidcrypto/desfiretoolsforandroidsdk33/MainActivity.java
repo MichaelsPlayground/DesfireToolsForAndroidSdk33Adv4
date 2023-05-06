@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -1261,6 +1262,9 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
         MenuItem freeMemory = menu.findItem(R.id.action_free_memory); // added
         MenuItem formatPicc = menu.findItem(R.id.action_format_picc); // added
 
+        // set freeMemory always visible
+        freeMemory.setVisible(true);
+
         //FragmentManager fragmentManager = getFragmentManager();
         //String name = fragmentManager.getBackStackEntryAt(fragmentManager.getBackStackEntryCount() - 1).getName();
 
@@ -1830,11 +1834,12 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
 
         });
 
+        // write to this file
         newFragment.setButtonClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Log.d(TAG, "onButtonClick writeToFile");
-
+                showFileWriteFragment(file);
             }
         });
 
@@ -1857,6 +1862,95 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
         // Commit the transaction
         transaction.commit();
 
+    }
+
+    private void showFileWriteFragment(DesfireFile file) {
+        Log.d(TAG, "showFileWriteFragment");
+
+        final FileWriteFragment newFragment = new FileWriteFragment(file);
+        // write to this file
+        newFragment.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Log.d(TAG, "onButtonClick writeToFile");
+                String dataToWrite = newFragment.getDataToWrite();
+                if (TextUtils.isEmpty(dataToWrite)) {
+                    newFragment.setLogData("please enter any text to write");
+                    return;
+                }
+                int fileLength = 0;
+                byte fileNo = (byte) (file.getId() & 0xff);
+                StandardDesfireFile standardDesfireFile;
+                RecordDesfireFile recordDesfireFile;
+                boolean isStandardFile = false;
+                boolean isRecordFile = false;
+                if(file instanceof StandardDesfireFile) {
+                    standardDesfireFile = (StandardDesfireFile) file;
+                    fileLength = standardDesfireFile.getFileSize();
+                    isStandardFile = true;
+                } else if (file instanceof RecordDesfireFile) {
+                    recordDesfireFile = (RecordDesfireFile) file;
+                    fileLength = recordDesfireFile.getRecordSize();
+                    isRecordFile = true;
+                } else if (file instanceof ValueDesfireFile) {
+                    newFragment.setLogData("writing to a value file is not supported at this time");
+                    return;
+                } else {
+                    newFragment.setLogData("unsupported file type, aborted");
+                    return;
+                }
+                // fill up the string with blanks up to fileLength (or trim the string)
+                byte[] dataToWriteByte = returnStringOfDefinedLength(dataToWrite, fileLength).getBytes(StandardCharsets.UTF_8);
+
+                // now we are ready to write but we do need an authentication with a write key
+
+                // test - if previously authenticated with default key 0 it has write rights
+                if (isStandardFile) {
+                    try {
+                        int result = mifare_desfire_write_data(tag, fileNo, 0, dataToWriteByte.length, dataToWriteByte);
+                        newFragment.setLogData("write StandardFile result (returns the data length if ok): " + result);
+                    } catch (Exception e) {
+                        //throw new RuntimeException(e);
+                        newFragment.setLogData("Exception on writing data to StandardFile: " + e.getMessage());
+                    }
+                }
+                // todo: if it is a LinearRecord file we receive an BE = boundary error, means the file is 'full'
+                if (isRecordFile) {
+                    try {
+                        int result = mifare_desfire_write_record(tag, fileNo, 0, dataToWriteByte.length, dataToWriteByte);
+                        newFragment.setLogData("write RecordFile result (returns the data length if ok): " + result);
+                        // don't forget to commit
+                        int result2 = mifare_desfire_commit_transaction(tag);
+                        newFragment.setLogData("write RecordFile result (returns the data length if ok): " + result + " commit result: " + result2);
+                    } catch (Exception e) {
+                        //throw new RuntimeException(e);
+                        newFragment.setLogData("Exception on writing data to RecordFile: " + e.getMessage());
+                    }
+
+                }
+
+
+
+            }
+        });
+
+/*
+		FragmentTransaction transaction = getFragmentManager().beginTransaction();
+		// Replace whatever is in the fragment_container view with this fragment,
+		// and add the transaction to the back stack
+		transaction.replace(R.id.content, newFragment, "file");
+		transaction.addToBackStack("file");
+		// Commit the transaction
+		transaction.commit();
+*/
+        androidx.fragment.app.FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        // Replace whatever is in the fragment_container view with this fragment,
+        // and add the transaction to the back stack
+        //Fragment fragment = new ApplicationNewFragment();
+        transaction.replace(R.id.content, newFragment, "fileWrite");
+        transaction.addToBackStack("fileWrite");
+        // Commit the transaction
+        transaction.commit();
     }
 
     @Override
@@ -2125,6 +2219,26 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
             } catch (Exception e) {
                 Log.d(TAG, "Problem reading record file", e);
             }
+        }
+    }
+
+    /**
+     * some string manipulations
+     */
+
+    private String returnStringOfDefinedLength(String data, int length) {
+        int dataLength = data.length();
+        if (dataLength == length) {
+            return data;
+        } else if (dataLength > length) {
+            return data.substring(0, length);
+        } else {
+            StringBuilder sb = new StringBuilder();
+            sb.append(data);
+            for (int i = 0; i < (length - dataLength); i++) {
+                sb.append(" ");
+            }
+            return sb.toString();
         }
     }
 
