@@ -2,6 +2,7 @@ package de.androidcrypto.desfiretoolsforandroidsdk33;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -83,7 +84,12 @@ public class ApplicationKeyChangeFragment extends Fragment {
 
 		changeKeyAid.setText(application.getIdString());
 
+		selectOldKey.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View view) {
 
+			}
+		});
 
 
 
