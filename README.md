@@ -45,9 +45,99 @@ When a DESFire EVx tag is found the app changes to the Application List fragment
 
 ### application list fragment
 
+After a successful connection to the card this fragment will list all applications on the card. The first application is always the 
+"Master File Application" that has the fixed application identifier ("AID") "0x000000". As long as the app has a connection to the card there are 
+green borders; if the connection gets lost the color changes to red.
+
+Below each AID the type of access keys (3DES, 3K3DES or AES) is displayed. The total number of access keys is shown as well.
+
+Clicking on an entry will open the File List Fragment. Using the options menu there are 3 more options: "add application", "free memory" and "format PICC".
+
+### files list fragment
+
+The are two main parts in this fragment:
+
+**Files**: All files are listed in this section. These 4 file types are available here:
+- a) Standard files
+- b) Value files
+- c) Linear Record files
+- d) Cyclic Record files
+For each file the communication setting (Open communication ("Plain"), Open communication secured with a MAC ("MACed") and 
+Enciphered communication ("Encrypted")) is displayed.
+
+The total number of access keys is show at last.
+
+A click on an entry opens a **key selector** to choose which key ("R&W", "R" or "W" should be used for authentication). The second part 
+is the selection of the stored key to run this action. After a successful authentication the File fragment is shown.
+
+**Access keys**: The access key below are taken from the key store an can be used to test an authentication.
+
+Using the option menu we can add a file or get the free memory on the card.
+
+At the top of the fragment there are 2 buttons: change application key settings and change application key.
+
+### add an application fragment
+
+There are 6 number pickers that allow to select an application id that has 6 hexadecimal digits. It is not allowed to select "000000" as 
+this is the already available Master File Application. If an application is existing we cannot overwrite the application and the 
+creation will fail.
+
+The second option is the type of keys used for this application (DES, TDES or AES). The third option is the number of key(1 to 13) available 
+for this application.
+
+Note: the specification allows to set "key number" 14 (free access without authentication) and "key number" 15 (no access allowed) but this 
+fragment does not support those keys.
+
+Second note: To create an application there is an additional parameter neccessary: **Key Settings**. The parameter is fixed to the value "0x0F" means:
+
+The application master key can be changed, Get FID list, Get File Settings and Get Key settings are without application master key, Create and 
+Delete file are permitted without application master key and this settings can be changed.
+
+### file fragment
+
+This fragment reads the content of the file (after a successful authentication). Depending on the files type different data is displayed:
+- Standard file: The content is shown in hex string encoding and additionally converted to an UTF-8 encoded string. Additionally 
+the size of the file is displayed.
+- Value file: the actual value, lower and upper limit and the limited credit option together with the limited credit value is shown.
+- Linear Record file: beneath the content of each record in hex string encoding the fragment informs about the record size in bytes, 
+the maximum number of records and the current records
+- Cyclic Records file: beneath the content of each record in hex string encoding the fragment informs about the record size in bytes, 
+the maximum number of records and the current records. Note that the Cyclic record file does need a spare record for writing, means 
+that there are only "Max records - 1" individual records.
+
+In the second part the Access key number are shown for "R&W", "R", "W" and "CAR" keys.
+
+On the top of the fragment a button allows to write to this file. 
+
+### file write fragment
+
+At the moment the support the writing to these file types only: Standard, Linear Record and Cyclic Record files. The writing to a value file
+("credit" and "debit") will be available in a future version, sorry.
+
+As a simple and open source hex editor is not available for Java I'm providing the writing of a string as only option. If the data is shorter  
+than the file or record size the string is filled up with blanks. If the data is longer than the file/record size the data is truncated.
+
+### change application settings
+
+...
+
+### change application key
+
+...
 
 
+### free memory option
 
+A toast will be shown that displays the free memory on the card.
+
+### format PICC option
+
+The format PICC option is not directly executed - a confirmation dialog asks is the format command is executed. The format command will delete all 
+applications (except for the Master File Application) and files from the card and releases the memory to factory settings.
+
+Note: this command will fail if the card has an activated card configuration option "Disable card formatting". If this bit is set there is 
+no way back. The second card option is a randomized UID, if this option is set there is no way back to the programmed UID.
+Note, you can only set these bits! Once set they are set, tough!
 
 
 ## The original description follows...
