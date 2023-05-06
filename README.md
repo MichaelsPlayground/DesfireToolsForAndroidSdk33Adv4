@@ -37,6 +37,17 @@ Using the menu you create **4 AES keys** named for their purpose:
 - AES 2 R: should be used as key for "Read" access
 - AES 3 W: should be used as key for "Write" access
 
+### start fragment ("scan DESFIRE EV1 tag")
+
+This is the starting point for all activites with a DESFire EV1/EV2/EV3 card. **This app does not work on DESFire light tags.**
+
+When a DESFire EVx tag is found the app changes to the Application List fragment
+
+### application list fragment
+
+
+
+
 
 
 ## The original description follows...
