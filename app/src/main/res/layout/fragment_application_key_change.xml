@@ -362,7 +362,12 @@
                 app:dividerInsetStart="8dp"
                 app:dividerThickness="4dp" />
 
-
+            <Button
+                android:id="@+id/btnKeyChangeSelectOldKey"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:text="select the old key" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -370,6 +375,13 @@
                 android:layout_marginTop="20dp"
                 android:text="@string/fileNewKeyInformation"
                 android:textSize="14sp" />
+
+            <Button
+                android:id="@+id/btnKeyChangeSelectNewKey"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:text="select the new key" />
 
 
             <TextView
