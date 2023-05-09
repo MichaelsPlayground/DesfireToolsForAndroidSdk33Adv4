@@ -12,6 +12,6 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
-rootProject.name = "DesfireToolsForAndroidSdk33Adv3"
+rootProject.name = "DesfireToolsForAndroidSdk33Adv4"
 include ':app'
 
