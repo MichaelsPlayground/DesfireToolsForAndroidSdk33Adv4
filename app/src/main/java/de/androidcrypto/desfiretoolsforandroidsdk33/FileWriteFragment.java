@@ -111,6 +111,8 @@ public class FileWriteFragment extends Fragment {
 
 	public void setOnClickListener(View.OnClickListener listener) {
 		this.listener = listener;
+		this.creditListener = listener;
+		this.debitListener = listener;
 	}
 
 	public String getCreditDataToWrite() {

@@ -1999,6 +1999,18 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
             @Override
             public void onClick(View view) {
                 Log.d(TAG, "onButtonClick writeToFile");
+
+                // can we distinguish which button was pressed ?
+                boolean isButtonCreditPressed = false;
+                boolean isButtonDebitPressed = false;
+                boolean isButtonWritePressed = false;
+                if (view.getId() == R.id.btnFileWriteCredit) {
+                    isButtonCreditPressed = true;
+                } else if (view.getId() == R.id.btnFileWriteDebit) {
+                    isButtonDebitPressed = true;
+                } else {
+                    isButtonWritePressed = true;
+                }
                 String dataToWrite = newFragment.getDataToWrite();
                 if (TextUtils.isEmpty(dataToWrite)) {
                     newFragment.setLogData("please enter any text to write");
@@ -2028,8 +2040,10 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
                 byte fileNo = (byte) (file.getId() & 0xff);
                 StandardDesfireFile standardDesfireFile;
                 RecordDesfireFile recordDesfireFile;
+                ValueDesfireFile valueDesfireFile;
                 boolean isStandardFile = false;
                 boolean isRecordFile = false;
+                boolean isValueFile = false;
                 if(file instanceof StandardDesfireFile) {
                     standardDesfireFile = (StandardDesfireFile) file;
                     fileLength = standardDesfireFile.getFileSize();
@@ -2039,43 +2053,71 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
                     fileLength = recordDesfireFile.getRecordSize();
                     isRecordFile = true;
                 } else if (file instanceof ValueDesfireFile) {
-                    newFragment.setLogData("writing to a value file is not supported at this time");
-                    return;
+                    valueDesfireFile = (ValueDesfireFile) file;
+                    // todo at this point we could check that the new value (after debit or credit) is within range of lower or upper limit)
+                    // if we debit or credit too much the commit transaction will fail
+                    isValueFile = true;
+                    //newFragment.setLogData("writing to a value file is not supported at this time");
+                    //return;
                 } else {
                     newFragment.setLogData("unsupported file type, aborted");
                     return;
                 }
-                // fill up the string with blanks up to fileLength (or trim the string)
-                byte[] dataToWriteByte = returnStringOfDefinedLength(dataToWrite, fileLength).getBytes(StandardCharsets.UTF_8);
 
-                // now we are ready to write but we do need an authentication with a write key
+                if (isButtonWritePressed) {
+                    // fill up the string with blanks up to fileLength (or trim the string)
+                    byte[] dataToWriteByte = returnStringOfDefinedLength(dataToWrite, fileLength).getBytes(StandardCharsets.UTF_8);
 
-                // test - if previously authenticated with default key 0 it has write rights
-                if (isStandardFile) {
-                    try {
-                        int result = mifare_desfire_write_data(tag, fileNo, 0, dataToWriteByte.length, dataToWriteByte);
-                        newFragment.setLogData("write StandardFile result (returns the data length if ok): " + result);
-                    } catch (Exception e) {
-                        //throw new RuntimeException(e);
-                        newFragment.setLogData("Exception on writing data to StandardFile: " + e.getMessage());
+                    // now we are ready to write but we do need an authentication with a write key
+
+                    // test - if previously authenticated with default key 0 it has write rights
+                    if (isStandardFile) {
+                        try {
+                            int result = mifare_desfire_write_data(tag, fileNo, 0, dataToWriteByte.length, dataToWriteByte);
+                            newFragment.setLogData("write StandardFile result (returns the data length if ok): " + result);
+                        } catch (Exception e) {
+                            //throw new RuntimeException(e);
+                            newFragment.setLogData("Exception on writing data to StandardFile: " + e.getMessage());
+                        }
                     }
-                }
-                // todo: if it is a LinearRecord file we receive an BE = boundary error, means the file is 'full'
-                if (isRecordFile) {
+                    // todo: if it is a LinearRecord file we receive an BE = boundary error, means the file is 'full'
+                    if (isRecordFile) {
+                        try {
+                            int result = mifare_desfire_write_record(tag, fileNo, 0, dataToWriteByte.length, dataToWriteByte);
+                            newFragment.setLogData("write RecordFile result (returns the data length if ok): " + result);
+                            // don't forget to commit
+                            int result2 = mifare_desfire_commit_transaction(tag);
+                            newFragment.setLogData("write RecordFile result (returns the data length if ok): " + result + " commit result: " + result2);
+                        } catch (Exception e) {
+                            //throw new RuntimeException(e);
+                            newFragment.setLogData("Exception on writing data to RecordFile: " + e.getMessage());
+                        }
+                    }
+                } // if (isButtonWritePressed) {
+                if (isButtonCreditPressed) {
                     try {
-                        int result = mifare_desfire_write_record(tag, fileNo, 0, dataToWriteByte.length, dataToWriteByte);
-                        newFragment.setLogData("write RecordFile result (returns the data length if ok): " + result);
+                        int result = mifare_desfire_credit(tag, fileNo, creditValue);
+                        newFragment.setLogData("credit ValueFile result (returns the data length if ok): " + result);
                         // don't forget to commit
                         int result2 = mifare_desfire_commit_transaction(tag);
-                        newFragment.setLogData("write RecordFile result (returns the data length if ok): " + result + " commit result: " + result2);
+                        newFragment.setLogData("credit ValueFile result (returns the data length if ok): " + result + " commit result: " + result2);
                     } catch (Exception e) {
                         //throw new RuntimeException(e);
-                        newFragment.setLogData("Exception on writing data to RecordFile: " + e.getMessage());
+                        newFragment.setLogData("Exception on crediting data to ValueFile: " + e.getMessage());
                     }
-
                 }
-
-
+                if (isButtonDebitPressed) {
+                    try {
+                        int result = mifare_desfire_debit(tag, fileNo, debitValue);
+                        newFragment.setLogData("debit ValueFile result (returns the data length if ok): " + result);
+                        // don't forget to commit
+                        int result2 = mifare_desfire_commit_transaction(tag);
+                        newFragment.setLogData("debit ValueFile result (returns the data length if ok): " + result + " commit result: " + result2);
+                    } catch (Exception e) {
+                        //throw new RuntimeException(e);
+                        newFragment.setLogData("Exception on crediting data to ValueFile: " + e.getMessage());
+                    }
+                }
 
             }
         });
