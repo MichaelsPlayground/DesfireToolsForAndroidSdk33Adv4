@@ -475,17 +475,6 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
         transaction.addToBackStack("applications");
         // Commit the transaction
         transaction.commit();
-
-		/*
-		FragmentTransaction transaction = fragmentManager.beginTransaction();
-		// Replace whatever is in the fragment_container view with this fragment,
-		// and add the transaction to the back stack
-		transaction.replace(R.id.content, newFragment, "applications");
-		transaction.addToBackStack("applications");
-
-		// Commit the transaction
-		transaction.commit();
-		 */
     }
 
     protected void onTagLost() {
@@ -509,20 +498,6 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
         transaction.addToBackStack("main");
         // Commit the transaction
         transaction.commit();
-
-
-
-		/*
-		final MainFragment newFragment = new MainFragment();
-		FragmentTransaction transaction = getFragmentManager().beginTransaction();
-		// Replace whatever is in the fragment_container view with this fragment,
-		// and add the transaction to the back stack
-		transaction.replace(R.id.content, newFragment, "main");
-		transaction.addToBackStack("main");
-
-		// Commit the transaction
-		transaction.commit();
-		 */
     }
 
     private void showApplicationFragment() {
@@ -586,7 +561,6 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
                                 return;
                             }
                         }
-
 
                         showKeyNumber(desfireFile, new OnKeyNumberListener() {
 
@@ -910,15 +884,6 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
 
         // Create new fragment and transaction
         final FileNewFragment newFragment = new FileNewFragment(application);
-        //final FileListFragment newFragment = new FileListFragment();
-
-        //newFragment.setApplication(application);
-
-		/* new with AppCompatActivity
-		final ApplicationNewFragment newFragment = new ApplicationNewFragment();
-		Fragment fragment = new ApplicationNewFragment();
-		getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, selectedFragment).commit();
-		*/
 
         newFragment.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -1035,19 +1000,7 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
                 // how to authenticate for create a file ?
                 if (application == null) {
                     System.out.println("application is null");
-
-                    //applications = new ArrayList<DesfireApplication>();
-
-                    //DesfireApplication desfireApplication = new DesfireApplication();
-                    //desfireApplication.setId(new byte[3]); // master application
-                    //applications.add(desfireApplication);
                 }
-                //application = applications.get(0); // master application
-                System.out.println("*** application: " + application.toString());
-                System.out.println("*** application idString: " + application.getIdString());
-                System.out.println("*** application hasKeys: " + application.hasKeys());
-
-
                 DesfireApplicationKeySettings keySettings = application.getKeySettings();
                 Log.d(TAG, keySettings.toString());
                 //if(keySettings.isRequiresMasterKeyForDirectoryList()) {
@@ -1203,7 +1156,6 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
                                     showToastShortToast("change application key settings result: " + result);
                                     newFragment.setLogData("change application key settings result: " + result);
 
-
                                 } else {
                                     showToast(R.string.applicationAuthenticatedFail);
                                 }
@@ -1241,7 +1193,6 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
             newFragment.setButtonListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    System.out.println("*** change application key pressed");
 
                     // 1 we do need to know the key number to get changed
                     // 2 get the old key value from store
@@ -1275,16 +1226,6 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
                     byte keyNumberForChanging = newFragment.getKeyNumberForChanging();
                     Log.d(TAG, "keyNumberForChanging: " + keyNumberForChanging);
                     // todo selectKey return MifareDesfireKey and not byte[]
-                    /*
-                    MifareDESFireKey desfireOldKey = new MifareDESFireKey();
-                    desfireOldKey.setVersion((byte) 0);
-                    desfireOldKey.setAESVersion((byte) 0);
-                    desfireOldKey.setData(oldKey);
-                    MifareDESFireKey desfireNewKey = new MifareDESFireKey();
-                    desfireNewKey.setVersion((byte) 0);
-                    desfireNewKey.setAESVersion((byte) 0);
-                    desfireNewKey.setData(newKey);
-                     */
 
                     DesfireApplicationKeySettings keySettings = application.getKeySettings();
                     Log.d(TAG, keySettings.toString());
@@ -1968,26 +1909,13 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
                 showFileWriteFragment(file);
             }
         });
-
-/*
-		FragmentTransaction transaction = getFragmentManager().beginTransaction();
-		// Replace whatever is in the fragment_container view with this fragment,
-		// and add the transaction to the back stack
-		transaction.replace(R.id.content, newFragment, "file");
-		transaction.addToBackStack("file");
-		// Commit the transaction
-		transaction.commit();
-*/
         androidx.fragment.app.FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-
         // Replace whatever is in the fragment_container view with this fragment,
         // and add the transaction to the back stack
-        //Fragment fragment = new ApplicationNewFragment();
         transaction.replace(R.id.content, newFragment, "file");
         transaction.addToBackStack("file");
         // Commit the transaction
         transaction.commit();
-
     }
 
     private void showFileWriteFragment(DesfireFile file) {
@@ -2064,13 +1992,12 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
                     return;
                 }
 
+                // todo authenticate with a write key !
+
+
                 if (isButtonWritePressed) {
                     // fill up the string with blanks up to fileLength (or trim the string)
                     byte[] dataToWriteByte = returnStringOfDefinedLength(dataToWrite, fileLength).getBytes(StandardCharsets.UTF_8);
-
-                    // now we are ready to write but we do need an authentication with a write key
-
-                    // test - if previously authenticated with default key 0 it has write rights
                     if (isStandardFile) {
                         try {
                             int result = mifare_desfire_write_data(tag, fileNo, 0, dataToWriteByte.length, dataToWriteByte);
@@ -2097,10 +2024,10 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
                 if (isButtonCreditPressed) {
                     try {
                         int result = mifare_desfire_credit(tag, fileNo, creditValue);
-                        newFragment.setLogData("credit ValueFile result (returns the data length if ok): " + result);
+                        newFragment.setLogData("credit ValueFile result (returns 0 if ok): " + result);
                         // don't forget to commit
                         int result2 = mifare_desfire_commit_transaction(tag);
-                        newFragment.setLogData("credit ValueFile result (returns the data length if ok): " + result + " commit result: " + result2);
+                        newFragment.setLogData("credit ValueFile result (returns 0 if ok): " + result + " commit result: " + result2);
                     } catch (Exception e) {
                         //throw new RuntimeException(e);
                         newFragment.setLogData("Exception on crediting data to ValueFile: " + e.getMessage());
@@ -2109,10 +2036,10 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
                 if (isButtonDebitPressed) {
                     try {
                         int result = mifare_desfire_debit(tag, fileNo, debitValue);
-                        newFragment.setLogData("debit ValueFile result (returns the data length if ok): " + result);
+                        newFragment.setLogData("debit ValueFile result (returns 0 if ok): " + result);
                         // don't forget to commit
                         int result2 = mifare_desfire_commit_transaction(tag);
-                        newFragment.setLogData("debit ValueFile result (returns the data length if ok): " + result + " commit result: " + result2);
+                        newFragment.setLogData("debit ValueFile result (returns 0 if ok): " + result + " commit result: " + result2);
                     } catch (Exception e) {
                         //throw new RuntimeException(e);
                         newFragment.setLogData("Exception on crediting data to ValueFile: " + e.getMessage());
@@ -2122,19 +2049,9 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
             }
         });
 
-/*
-		FragmentTransaction transaction = getFragmentManager().beginTransaction();
-		// Replace whatever is in the fragment_container view with this fragment,
-		// and add the transaction to the back stack
-		transaction.replace(R.id.content, newFragment, "file");
-		transaction.addToBackStack("file");
-		// Commit the transaction
-		transaction.commit();
-*/
         androidx.fragment.app.FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         // Replace whatever is in the fragment_container view with this fragment,
         // and add the transaction to the back stack
-        //Fragment fragment = new ApplicationNewFragment();
         transaction.replace(R.id.content, newFragment, "fileWrite");
         transaction.addToBackStack("fileWrite");
         // Commit the transaction
