@@ -1268,17 +1268,9 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
                             }
                         }
                     });
-
-
-
-
-
-
                 }
             });
         }
-
-        //FragmentTransaction transaction = getFragmentManager().beginTransaction();
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         // Replace whatever is in the fragment_container view with this fragment,
         // and add the transaction to the back stack
@@ -1331,10 +1323,6 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
 
         // set freeMemory always visible
         freeMemory.setVisible(true);
-
-        //FragmentManager fragmentManager = getFragmentManager();
-        //String name = fragmentManager.getBackStackEntryAt(fragmentManager.getBackStackEntryCount() - 1).getName();
-
         androidx.fragment.app.FragmentManager fragmentManager = getSupportFragmentManager();
         String name = fragmentManager.getBackStackEntryAt(fragmentManager.getBackStackEntryCount() - 1).getName();
 
@@ -1375,13 +1363,9 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
 
         Log.d(TAG, "Prepare options menu for " + name);
         if (name != null && name.equals("file")) {
-            //getFragmentManager().executePendingTransactions();
             getSupportFragmentManager().executePendingTransactions();
-
             FileFragment fragment = (FileFragment) fragmentManager.findFragmentByTag("file");
-
             DesfireFile file = fragment.getFile();
-
             if (file instanceof ValueDesfireFile) {
                 save.setVisible(false);
             } else {
@@ -1390,7 +1374,6 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
         } else {
             save.setVisible(false);
         }
-
         return super.onPrepareOptionsMenu(menu);
     }
 
@@ -1617,132 +1600,88 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
 
     private void showKeysFragment() {
         Log.d(TAG, "showKeysFragment");
-
         // Create new fragment and transaction
         final KeyListFragment newFragment = new KeyListFragment();
         newFragment.setContext(this);
         newFragment.setDataSource(MainApplication.getInstance().getDataSource());
-
         newFragment.setOnItemClickListener(new OnItemClickListener() {
-
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Log.d(TAG, "onItemClick " + position + " for " + id);
-
                 ApplicationDetail applicationDetail = newFragment.getApplicationDetail(position);
-
                 if (applicationDetail instanceof ApplicationDetailKey) {
                     ApplicationDetailKey key = (ApplicationDetailKey) applicationDetail;
-
                     DesfireKey desfire = key.getKey();
-
                     Log.d(TAG, "Show details for key " + desfire);
-
-                    //KeyListFragment fragment = (KeyListFragment) getFragmentManager().findFragmentByTag("keys");
                     KeyListFragment fragment = (KeyListFragment) getSupportFragmentManager().findFragmentByTag("keys");
                     fragment.setDataSource(MainApplication.getInstance().getDataSource());
                     fragment.showAddKey(desfire);
-
                 }
-
             }
-
         });
-        //FragmentTransaction transaction = getFragmentManager().beginTransaction();
         androidx.fragment.app.FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-
         // Replace whatever is in the fragment_container view with this fragment,
         // and add the transaction to the back stack
         transaction.replace(R.id.content, newFragment, "keys");
         transaction.addToBackStack("keys");
-
         // Commit the transaction
         transaction.commit();
     }
 
 
     private boolean authenticate(DesfireApplicationKey desfireApplicationKey) throws Exception {
-
         DesfireKey key = desfireApplicationKey.getDesfireKey();
-
         Log.d(TAG, "Authenticate key " + (byte) desfireApplicationKey.getIndex());
-
         /* Authenticate with this key */
         switch (key.getType()) {
             case AES: {
-
                 DesfireAESKey aesKey = (DesfireAESKey) key;
-
                 MifareDESFireKey mifareDESFireKey = MifareDesfireKey1.mifare_desfire_aes_key_new_with_version(aesKey.getValue(), (byte) key.getVersion());
-
                 int result = mifare_desfire_authenticate_aes(tag, (byte) desfireApplicationKey.getIndex(), mifareDESFireKey);
-
                 if (result == 0) {
                     Log.d(TAG, "Authenticated AES using key " + key.getName() + " index " + (byte) desfireApplicationKey.getIndex());
-
                     return true;
                 } else {
                     Log.d(TAG, "Unable to authenticate AES using key " + key.getName());
                 }
-
                 break;
             }
             case TKTDES: {
-
                 Desfire3K3DESKey desfire3k3desKey = (Desfire3K3DESKey) key;
-
                 MifareDESFireKey mifareDESFireKey = MifareDesfireKey1.mifare_desfire_3k3des_key_new(desfire3k3desKey.getValue());
-
                 int result = mifare_desfire_authenticate_iso(tag, (byte) desfireApplicationKey.getIndex(), mifareDESFireKey);
-
                 if (result == 0) {
                     Log.d(TAG, "Authenticated 3K3DES using key " + key.getName());
-
                     return true;
                 } else {
                     Log.d(TAG, "Unable to authenticate 3K3DES using key " + key.getName());
                 }
-
                 break;
             }
             case TDES: {
-
                 Desfire3DESKey desfire3desKey = (Desfire3DESKey) key;
-
                 MifareDESFireKey mifareDESFireKey = MifareDesfireKey1.mifare_desfire_3des_key_new(desfire3desKey.getValue());
-
                 MifareDesfireKey1.mifare_desfire_key_set_version(mifareDESFireKey, (byte) desfire3desKey.getVersion());
-
                 int result = mifare_desfire_authenticate(tag, (byte) desfireApplicationKey.getIndex(), mifareDESFireKey);
-
                 if (result == 0) {
                     Log.d(TAG, "Authenticated 3DES using key " + key.getName());
-
                     return true;
                 } else {
                     Log.d(TAG, "Unable to authenticate 3DES using key " + key.getName());
                 }
-
                 break;
             }
             case DES: {
-
                 DesfireDESKey desfireDesKey = (DesfireDESKey) key;
-
                 MifareDESFireKey mifareDESFireKey = MifareDesfireKey1.mifare_desfire_des_key_new(desfireDesKey.getValue());
-
                 MifareDesfireKey1.mifare_desfire_key_set_version(mifareDESFireKey, (byte) desfireDesKey.getVersion());
-
                 int result = mifare_desfire_authenticate(tag, (byte) desfireApplicationKey.getIndex(), mifareDESFireKey);
-
                 if (result == 0) {
                     Log.d(TAG, "Authenticated DES using key " + key.getName());
-
                     return true;
                 } else {
                     Log.d(TAG, "Unable to authenticate DES using key " + key.getName());
                 }
-
                 break;
             }
         }
@@ -1750,14 +1689,10 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
     }
 
     private void showKeyNumber(DesfireFile desfireFile, final OnKeyNumberListener listener) {
-
         final Map<Integer, String> compactPermissionMap = desfireFile.getCompactPermissionMap();
-
         final List<Integer> keyNumbers = new ArrayList<>(compactPermissionMap.keySet());
         Collections.sort(keyNumbers);
-
         List<String> keys = new ArrayList<>();
-
         for (int i = 0; i < keyNumbers.size(); i++) {
             Integer keyNumber = keyNumbers.get(i);
             if (keyNumber == 14) {
@@ -1780,31 +1715,23 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
                 }
                 buffer.append(getString(R.string.fileAccessKeyChange));
             }
-
             keys.add(getString(R.string.fileAccessKey, keyNumber, buffer.toString()));
         }
-
         String names[] = keys.toArray(new String[keys.size()]);
-
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(MainActivity.this);
         LayoutInflater inflater = getLayoutInflater();
         View convertView = (View) inflater.inflate(R.layout.dialog_list, null);
         alertDialog.setView(convertView);
-
         alertDialog.setTitle(getString(R.string.fileAccessSelectKey));
         ListView lv = (ListView) convertView.findViewById(R.id.listView);
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_list_item_1, names);
         lv.setAdapter(adapter);
         final AlertDialog show = alertDialog.show();
-
         lv.setOnItemClickListener(new OnItemClickListener() {
-
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 show.dismiss();
-
                 Integer keyNumber = keyNumbers.get(position);
-
                 listener.onKeyNumber(keyNumber, compactPermissionMap.get(keyNumber));
             }
         });
@@ -1812,19 +1739,15 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
 
     private void showKeySelector(DesfireKeyType type, final OnKeyListener listener) {
         MainApplication application = MainApplication.getInstance();
-
         DataSource dataSource = application.getDataSource();
-
         final List<DesfireKey> keys;
         if (type == DesfireKeyType.TDES || type == DesfireKeyType.DES) {
             keys = new ArrayList<>();
-
             keys.addAll(dataSource.getKeys(DesfireKeyType.DES));
             keys.addAll(dataSource.getKeys(DesfireKeyType.TKTDES));
         } else {
             keys = dataSource.getKeys(type);
         }
-
         if (!keys.isEmpty()) {
             String names[] = new String[keys.size()];
             for (int i = 0; i < names.length; i++) {
@@ -1834,24 +1757,18 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
             LayoutInflater inflater = getLayoutInflater();
             View convertView = (View) inflater.inflate(R.layout.dialog_list, null);
             alertDialog.setView(convertView);
-
             alertDialog.setTitle(getString(R.string.applicationAuthenticateKey, getName(type)));
             ListView lv = (ListView) convertView.findViewById(R.id.listView);
             ArrayAdapter<String> adapter = new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_list_item_1, names);
             lv.setAdapter(adapter);
             final AlertDialog show = alertDialog.show();
-
             lv.setOnItemClickListener(new OnItemClickListener() {
-
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                     show.dismiss();
-
                     DesfireKey key = keys.get(position);
-
                     listener.onKey(key);
                 }
-
             });
         } else {
             Log.d(TAG, "No " + type + " keys found");
@@ -1994,58 +1911,96 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
 
                 // todo authenticate with a write key !
 
-
-                if (isButtonWritePressed) {
-                    // fill up the string with blanks up to fileLength (or trim the string)
-                    byte[] dataToWriteByte = returnStringOfDefinedLength(dataToWrite, fileLength).getBytes(StandardCharsets.UTF_8);
-                    if (isStandardFile) {
+                // how to authenticate for create a file ?
+                if (application == null) {
+                    System.out.println("application is null");
+                }
+                DesfireApplicationKeySettings keySettings = application.getKeySettings();
+                Log.d(TAG, keySettings.toString());
+                //if(keySettings.isRequiresMasterKeyForDirectoryList()) {
+                final List<DesfireApplicationKey> keys = application.getKeys();
+                final DesfireApplicationKey root = keys.get(0);
+                boolean finalIsButtonWritePressed = isButtonWritePressed;
+                int finalFileLength = fileLength;
+                boolean finalIsStandardFile = isStandardFile;
+                boolean finalIsRecordFile = isRecordFile;
+                boolean finalIsButtonCreditPressed = isButtonCreditPressed;
+                boolean finalIsButtonDebitPressed = isButtonDebitPressed;
+                showKeySelector(keySettings.getType(), new OnKeyListener() {
+                    @Override
+                    public void onKey(DesfireKey key) {
+                        if (!isConnected()) {
+                            Log.d(TAG, "Tag lost wanting to select application");
+                            onTagLost();
+                            return;
+                        }
                         try {
-                            int result = mifare_desfire_write_data(tag, fileNo, 0, dataToWriteByte.length, dataToWriteByte);
-                            newFragment.setLogData("write StandardFile result (returns the data length if ok): " + result);
+                            DesfireApplicationKey clone = new DesfireApplicationKey(root.getIndex(), key);
+                            if (authenticate(clone)) {
+                                MainActivity.this.authenticatedKey = clone;
+                                // todo run the code after auth here ?
+                                showToast(R.string.applicationAuthenticatedSuccess);
+                                if (finalIsButtonWritePressed) {
+                                    // fill up the string with blanks up to fileLength (or trim the string)
+                                    byte[] dataToWriteByte = returnStringOfDefinedLength(dataToWrite, finalFileLength).getBytes(StandardCharsets.UTF_8);
+                                    if (finalIsStandardFile) {
+                                        try {
+                                            int result = mifare_desfire_write_data(tag, fileNo, 0, dataToWriteByte.length, dataToWriteByte);
+                                            newFragment.setLogData("write StandardFile result (returns the data length if ok): " + result);
+                                        } catch (Exception e) {
+                                            //throw new RuntimeException(e);
+                                            newFragment.setLogData("Exception on writing data to StandardFile: " + e.getMessage());
+                                        }
+                                    }
+                                    // todo: if it is a LinearRecord file we receive an BE = boundary error, means the file is 'full'
+                                    if (finalIsRecordFile) {
+                                        try {
+                                            int result = mifare_desfire_write_record(tag, fileNo, 0, dataToWriteByte.length, dataToWriteByte);
+                                            newFragment.setLogData("write RecordFile result (returns the data length if ok): " + result);
+                                            // don't forget to commit
+                                            int result2 = mifare_desfire_commit_transaction(tag);
+                                            newFragment.setLogData("write RecordFile result (returns the data length if ok): " + result + " commit result: " + result2);
+                                        } catch (Exception e) {
+                                            //throw new RuntimeException(e);
+                                            newFragment.setLogData("Exception on writing data to RecordFile: " + e.getMessage());
+                                        }
+                                    }
+                                } // if (isButtonWritePressed) {
+                                if (finalIsButtonCreditPressed) {
+                                    try {
+                                        int result = mifare_desfire_credit(tag, fileNo, creditValue);
+                                        newFragment.setLogData("credit ValueFile result (returns 0 if ok): " + result);
+                                        // don't forget to commit
+                                        int result2 = mifare_desfire_commit_transaction(tag);
+                                        newFragment.setLogData("credit ValueFile result (returns 0 if ok): " + result + " commit result: " + result2);
+                                    } catch (Exception e) {
+                                        //throw new RuntimeException(e);
+                                        newFragment.setLogData("Exception on crediting data to ValueFile: " + e.getMessage());
+                                    }
+                                }
+                                if (finalIsButtonDebitPressed) {
+                                    try {
+                                        int result = mifare_desfire_debit(tag, fileNo, debitValue);
+                                        newFragment.setLogData("debit ValueFile result (returns 0 if ok): " + result);
+                                        // don't forget to commit
+                                        int result2 = mifare_desfire_commit_transaction(tag);
+                                        newFragment.setLogData("debit ValueFile result (returns 0 if ok): " + result + " commit result: " + result2);
+                                    } catch (Exception e) {
+                                        //throw new RuntimeException(e);
+                                        newFragment.setLogData("Exception on crediting data to ValueFile: " + e.getMessage());
+                                    }
+                                }
+
+                            } else {
+                                showToast(R.string.applicationAuthenticatedFail);
+                            }
+
                         } catch (Exception e) {
-                            //throw new RuntimeException(e);
-                            newFragment.setLogData("Exception on writing data to StandardFile: " + e.getMessage());
+                            Log.d(TAG, "Unable to authenticate", e);
+                            showToast(R.string.applicationAuthenticatedFail);
                         }
                     }
-                    // todo: if it is a LinearRecord file we receive an BE = boundary error, means the file is 'full'
-                    if (isRecordFile) {
-                        try {
-                            int result = mifare_desfire_write_record(tag, fileNo, 0, dataToWriteByte.length, dataToWriteByte);
-                            newFragment.setLogData("write RecordFile result (returns the data length if ok): " + result);
-                            // don't forget to commit
-                            int result2 = mifare_desfire_commit_transaction(tag);
-                            newFragment.setLogData("write RecordFile result (returns the data length if ok): " + result + " commit result: " + result2);
-                        } catch (Exception e) {
-                            //throw new RuntimeException(e);
-                            newFragment.setLogData("Exception on writing data to RecordFile: " + e.getMessage());
-                        }
-                    }
-                } // if (isButtonWritePressed) {
-                if (isButtonCreditPressed) {
-                    try {
-                        int result = mifare_desfire_credit(tag, fileNo, creditValue);
-                        newFragment.setLogData("credit ValueFile result (returns 0 if ok): " + result);
-                        // don't forget to commit
-                        int result2 = mifare_desfire_commit_transaction(tag);
-                        newFragment.setLogData("credit ValueFile result (returns 0 if ok): " + result + " commit result: " + result2);
-                    } catch (Exception e) {
-                        //throw new RuntimeException(e);
-                        newFragment.setLogData("Exception on crediting data to ValueFile: " + e.getMessage());
-                    }
-                }
-                if (isButtonDebitPressed) {
-                    try {
-                        int result = mifare_desfire_debit(tag, fileNo, debitValue);
-                        newFragment.setLogData("debit ValueFile result (returns 0 if ok): " + result);
-                        // don't forget to commit
-                        int result2 = mifare_desfire_commit_transaction(tag);
-                        newFragment.setLogData("debit ValueFile result (returns 0 if ok): " + result + " commit result: " + result2);
-                    } catch (Exception e) {
-                        //throw new RuntimeException(e);
-                        newFragment.setLogData("Exception on crediting data to ValueFile: " + e.getMessage());
-                    }
-                }
-
+                });
             }
         });
 
