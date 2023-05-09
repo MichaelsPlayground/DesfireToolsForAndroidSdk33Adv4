@@ -23,6 +23,8 @@ the build.gradle (app) file.
 
 ## Status of this app
 
+**This is an unfinished project** and the next enhancements will be done in DesfireToolsForAndroidSdk33Adv4 !
+
 ### Key management module
 
 This module stores keys needed for authentication. There are 4 key types available: DES (8 bytes long), 
