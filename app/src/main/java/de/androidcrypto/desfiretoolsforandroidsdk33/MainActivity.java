@@ -1167,7 +1167,7 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
                         newFragment.setLogData("Please select the old key");
                         return;
                     }
-                    if (desfireNewKey == null)  {
+                    if (desfireNewKey == null) {
                         newFragment.setLogData("Please select the new key");
                         return;
                     }
@@ -1178,7 +1178,7 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
                         newFragment.setLogData("Please select the old key");
                         return;
                     }
-                    if (newKey == null)  {
+                    if (newKey == null) {
                         newFragment.setLogData("Please select the new key");
                         return;
                     }
@@ -1274,7 +1274,10 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
 
         MenuItem keys = menu.findItem(R.id.action_settings);
         MenuItem addKey = menu.findItem(R.id.action_add);
-        MenuItem addSampleKeys = menu.findItem(R.id.action_sample_keys);
+        MenuItem addDesSampleKeys = menu.findItem(R.id.action_des_sample_keys);
+        MenuItem add3DesSampleKeys = menu.findItem(R.id.action_3des_sample_keys);
+        MenuItem add3K3DesSampleKeys = menu.findItem(R.id.action_3k3des_sample_keys);
+        MenuItem addAesSampleKeys = menu.findItem(R.id.action_aes_sample_keys);
         MenuItem save = menu.findItem(R.id.action_save);
         MenuItem addApplication = menu.findItem(R.id.action_add_app); // added
         MenuItem addFile = menu.findItem(R.id.action_add_file); // added
@@ -1289,7 +1292,10 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
         if (name != null && name.equals("keys")) {
             keys.setVisible(false);
             addKey.setVisible(true);
-            addSampleKeys.setVisible(true);
+            addDesSampleKeys.setVisible(true);
+            add3DesSampleKeys.setVisible(true);
+            add3K3DesSampleKeys.setVisible(true);
+            addAesSampleKeys.setVisible(true);
             addApplication.setVisible(false); // added
             addFile.setVisible(false); // added
 
@@ -1345,8 +1351,17 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
         } else if (item.getItemId() == R.id.action_add) {
             addKey();
             return true;
-        } else if (item.getItemId() == R.id.action_sample_keys) {
-            setupSampleKeys();
+        } else if (item.getItemId() == R.id.action_des_sample_keys) {
+            setupDesSampleKeys();
+            return true;
+        } else if (item.getItemId() == R.id.action_3des_sample_keys) {
+            setup3DesSampleKeys();
+            return true;
+        } else if (item.getItemId() == R.id.action_3k3des_sample_keys) {
+            setup3K3DesSampleKeys();
+            return true;
+        } else if (item.getItemId() == R.id.action_aes_sample_keys) {
+            setupAesSampleKeys();
             return true;
         } else if (item.getItemId() == R.id.action_save) {
             saveFileData();
@@ -1401,7 +1416,7 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
     // added
 
     /**
-     * This method will setup keys for all key types (DES, 3DES, 3K3DES and AES)
+     * This method will setup keys for one key type (DES, 3DES, 3K3DES or AES)
      * It will add 3 keys (nr 0, 1 and 2) for each type
      * The naming will get this structure (e.g. for DES):
      * DES
@@ -1416,7 +1431,115 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
      * key 0 (RW) = 0xF0, 1 (R) = 0xF1, 2 (W) = 0xF2
      * The following bytes will be filled with 0x00's
      */
-    private void setupSampleKeys() {
+
+    private void setupDesSampleKeys() {
+        int numberOfKeys = 4;
+        int lengthDes = 8;
+        int length3Des = 16;
+        int length3K3Des = 24;
+        int lengthAes = 16;
+
+        // des
+        for (int i = 0; i < numberOfKeys; i++) {
+            byte[] key = new byte[lengthDes];
+            key[0] = (byte) (0xD1);
+            key[1] = (byte) ((byte) (0xF0) | (byte) (i & 0xff));
+            StringBuilder sb = new StringBuilder();
+            sb.append("DES ").append(i);
+            if (i == 0) {
+                sb.append(" RW");
+            } else if (i == 1) {
+                sb.append(" CAR");
+            } else if (i == 2) {
+                sb.append(" R");
+            } else if (i == 3) {
+                sb.append(" W");
+            } else {
+                sb.append(" unknown");
+            }
+            DesfireKey desfireKey = DesfireKey.newInstance(DesfireKeyType.DES, Integer.parseInt("01", 16));
+            desfireKey.setName(sb.toString());
+            desfireKey.setValue(key);
+            try {
+                MainApplication.getInstance().getDataSource().createKey(desfireKey);
+            } catch (IOException e) {
+                Log.d(TAG, "Problem adding key", e);
+            }
+        } // DES
+    }
+
+    private void setup3DesSampleKeys() {
+        int numberOfKeys = 4;
+        int lengthDes = 8;
+        int length3Des = 16;
+        int length3K3Des = 24;
+        int lengthAes = 16;
+
+        // 3des
+        for (int i = 0; i < numberOfKeys; i++) {
+            byte[] key = new byte[length3Des];
+            key[0] = (byte) (0xD3);
+            key[1] = (byte) ((byte) (0xF0) | (byte) (i & 0xff));
+            StringBuilder sb = new StringBuilder();
+            sb.append("3DES ").append(i);
+            if (i == 0) {
+                sb.append(" RW");
+            } else if (i == 1) {
+                sb.append(" CAR");
+            } else if (i == 2) {
+                sb.append(" R");
+            } else if (i == 3) {
+                sb.append(" W");
+            } else {
+                sb.append(" unknown");
+            }
+            DesfireKey desfireKey = DesfireKey.newInstance(DesfireKeyType.TDES, Integer.parseInt("01", 16));
+            desfireKey.setName(sb.toString());
+            desfireKey.setValue(key);
+            try {
+                MainApplication.getInstance().getDataSource().createKey(desfireKey);
+            } catch (IOException e) {
+                Log.d(TAG, "Problem adding key", e);
+            }
+        } // 3DES
+    }
+
+    private void setup3K3DesSampleKeys() {
+        int numberOfKeys = 4;
+        int lengthDes = 8;
+        int length3Des = 16;
+        int length3K3Des = 24;
+        int lengthAes = 16;
+		// 3K3Des
+		for (int i = 0; i < numberOfKeys; i++) {
+			byte[] key = new byte[length3K3Des];
+			key[0] = (byte) (0xD4);
+			key[1] = (byte) ((byte)(0xF0) | (byte) (i & 0xff));
+			StringBuilder sb = new StringBuilder();
+			sb.append("3K3DES ").append(i);
+            if (i == 0) {
+                sb.append(" RW");
+            } else if (i == 1) {
+                sb.append(" CAR");
+            } else if (i == 2) {
+                sb.append(" R");
+            } else if (i == 3) {
+                sb.append(" W");
+            } else {
+                sb.append(" unknown");
+            }
+			DesfireKey desfireKey = DesfireKey.newInstance(DesfireKeyType.TKTDES, Integer.parseInt("01", 16));
+			desfireKey.setName(sb.toString());
+			desfireKey.setValue(key);
+			try {
+				MainApplication.getInstance().getDataSource().createKey(desfireKey);
+			} catch (IOException e) {
+				Log.d(TAG, "Problem adding key", e);
+			}
+		} // 3K3DES
+    }
+
+    private void setupAesSampleKeys() {
         int numberOfKeys = 4;
         int lengthDes = 8;
         int length3Des = 16;
@@ -1529,7 +1652,6 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
                 Log.d(TAG, "Problem adding key", e);
             }
         } // AES
-
     }
 
     private void addKey() {
@@ -1849,7 +1971,7 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
                 boolean isStandardFile = false;
                 boolean isRecordFile = false;
                 boolean isValueFile = false;
-                if(file instanceof StandardDesfireFile) {
+                if (file instanceof StandardDesfireFile) {
                     standardDesfireFile = (StandardDesfireFile) file;
                     fileLength = standardDesfireFile.getFileSize();
                     isStandardFile = true;
