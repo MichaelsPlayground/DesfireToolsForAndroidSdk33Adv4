@@ -43,26 +43,15 @@ public class ApplicationKeyChangeFragment extends Fragment {
 
     // todo block file creation if application id = 00 00 00 = master file application
 
-    private NumberPicker npFileId, npKeyRw, npKeyCar, npKeyR, npKeyW, npNrOfRecords;
+    private NumberPicker npKeyChangeSelectedKey;
     private EditText changeKeyAid, changeKeyOldKey, changeKeyNewKey;
 
-    private EditText changeKeySettingsExisting, changeKeySettingsChanged, maximumNumberOfKeys;
+    private EditText maximumNumberOfKeys;
     private Button selectOldKey, selectNewKey;
     private DesfireKey oldDesfireKeyForChanging, newDesfireKeyForChanging;
-    private byte[] oldKeyForChanging, newKeyForChanging;
     private byte keyNumberForChanging;
+    private int keyNumberForChangingInt;
 
-
-    private interface OnKeyListener {
-        void onKey(DesfireKey key);
-    }
-
-
-    private EditText keyUsedForCar;
-
-    private boolean bit0New, bit1New, bit2New, bit3New;
-    private byte keySettingsChanged;
-    private int keyNumberForAccessRightChangeExisting;
     Button doChangeKey;
     private TextView logData;
 
@@ -70,6 +59,9 @@ public class ApplicationKeyChangeFragment extends Fragment {
 
     private View.OnClickListener listener;
 
+    private interface OnKeyListener {
+        void onKey(DesfireKey key);
+    }
 
     // todo use Bundle instead of a constructor for parameter
     @SuppressLint("ValidFragment")
@@ -95,17 +87,37 @@ public class ApplicationKeyChangeFragment extends Fragment {
         selectOldKey = view.findViewById(R.id.btnSelectOldKey);
         selectNewKey = view.findViewById(R.id.btnSelectNewKey);
 
-        changeKeySettingsExisting = view.findViewById(R.id.etKeySettingsExisting);
-        changeKeySettingsChanged = view.findViewById(R.id.etKeySettingsChanged);
-
+        npKeyChangeSelectedKey = view.findViewById(R.id.npKeyChangingSelectedKey);
         maximumNumberOfKeys = view.findViewById(R.id.etMaximumNumberOfKeys);
-        keyUsedForCar = view.findViewById(R.id.etKeySettingsCarKey);
+
         doChangeKey = view.findViewById(R.id.btnDoChangeKey);
         logData = view.findViewById(R.id.tvLog);
 
         changeKeyAid.setText(application.getIdString());
 
-        keyNumberForChanging = (byte) 0x01; // todo change fixed keyNumber
+        keyNumberForChanging = (byte) 0x00; // default
+        keyNumberForChangingInt = 0; // default
+
+
+        // init the key selector (numberPicker), the maximumKeys info and enable the doChange button
+        // get the existing key settings
+        DesfireApplicationKeySettings existingKeySettings = application.getKeySettings();
+        int maxKeys = existingKeySettings.getMaxKeys();
+        if (maxKeys > 0) {
+            doChangeKey.setEnabled(true);
+        } else {
+            doChangeKey.setEnabled(false);
+        }
+        maximumNumberOfKeys.setText("key type: " + existingKeySettings.getType().toString() + " keys: " + maxKeys);
+        npKeyChangeSelectedKey.setMaxValue(maxKeys - 1);
+
+        npKeyChangeSelectedKey.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
+            @Override
+            public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+                keyNumberForChanging = (byte) (newVal & 0xff);
+                keyNumberForChangingInt = newVal;
+            }
+        });
 
         selectOldKey.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -123,10 +135,8 @@ public class ApplicationKeyChangeFragment extends Fragment {
                 int appNumberOfKeys = appKeys.size();
                 Log.d(TAG, "appNumberOfKeys: " + appNumberOfKeys);
 
-                // todo select the key number to change
-                // here I am choosing key 1
-                Log.d(TAG, "fixed to use key 1");
-                DesfireApplicationKey appKey1 = appKeys.get(1);
+                Log.d(TAG, "change old key " + keyNumberForChangingInt);
+                DesfireApplicationKey appKey1 = appKeys.get(keyNumberForChangingInt);
                 int appKey1Index = appKey1.getIndex();
                 Log.d(TAG, "appKey1Index: " + appKey1Index);
                 DesfireKey appKey1DesfireKey = appKey1.getDesfireKey();
@@ -163,10 +173,8 @@ public class ApplicationKeyChangeFragment extends Fragment {
                 int appNumberOfKeys = appKeys.size();
                 Log.d(TAG, "appNumberOfKeys: " + appNumberOfKeys);
 
-                // todo select the key number to change
-                // here I am choosing key 1
-                Log.d(TAG, "fixed to use key 1");
-                DesfireApplicationKey appKey1 = appKeys.get(1);
+                Log.d(TAG, "change new key " + keyNumberForChangingInt);
+                DesfireApplicationKey appKey1 = appKeys.get(keyNumberForChangingInt);
                 int appKey1Index = appKey1.getIndex();
                 Log.d(TAG, "appKey1Index: " + appKey1Index);
                 DesfireKey appKey1DesfireKey = appKey1.getDesfireKey();
@@ -187,55 +195,8 @@ public class ApplicationKeyChangeFragment extends Fragment {
             }
         });
 
-        // get the existing key settings
-        DesfireApplicationKeySettings existingKeySettings = application.getKeySettings();
-        changeKeySettingsExisting.setText(
-
-                bytesToHexNpe(existingKeySettings.getSettings()));
-        maximumNumberOfKeys.setText("key type: " + existingKeySettings.getType().
-
-                toString() + " keys: " + existingKeySettings.getMaxKeys());
-        changeKeySettingsChanged.setText(
-
-                bytesToHexNpe(existingKeySettings.getSettings()));
-        byte keySettings = existingKeySettings.getSettings()[0];
-        byte keyNumbers = existingKeySettings.getSettings()[1]; // do not change this as it is not send to the PICC
-        keySettingsChanged = keySettings;
-        System.out.println("keySettings: " + keySettings + " keyNumbers: " + keyNumbers);
-
-        //
-		/*
-			bit 0 is most right bis (counted from right to left)
-			bit 0 = application master key is changeable (1) or frozen (0)
-			bit 1 = application master key authentication is needed for file directory access (1)
-			bit 2 = application master key authentication is needed before CreateFile / DeleteFile (1)
-			bit 3 = change of the application master key settings is allowed (1)
-			bit 4-7 = hold the Access Rights for changing application keys (ChangeKey command)
-			• 0x0: Application master key authentication is necessary to change any key (default).
-			• 0x1 .. 0xD: Authentication with the specified key is necessary to change any key.
-			• 0xE: Authentication with the key to be changed (same KeyNo) is necessary to change a key.
-			• 0xF: All Keys (except application master key, see Bit0) within this application are frozen.
-		 */
-        boolean bit0MasterKeyIsChangeable = existingKeySettings.isCanChangeMasterKey();
-        boolean bit1MasterKeyAuthenticationNeededDirListing = existingKeySettings.isRequiresMasterKeyForDirectoryList();
-        boolean bit2MasterKeyAuthenticationNeededCreateDelete = existingKeySettings.isRequiresMasterKeyForCreateAndDelete();
-        boolean bit3MasterKeySettingsChangeAllowed = existingKeySettings.isConfigurationChangable();
-
-
         logData.setText("Existing settings\n" + existingKeySettings.toString());
-
-        // take the existing settings
-        bit0New = bit0MasterKeyIsChangeable;
-        bit1New = bit1MasterKeyAuthenticationNeededDirListing;
-        bit2New = bit2MasterKeyAuthenticationNeededCreateDelete;
-        bit3New = bit3MasterKeySettingsChangeAllowed;
-
-        keyNumberForAccessRightChangeExisting = existingKeySettings.getChangeKeyAccessRights(); // use this for a numberPicker to change
-        int maximumNumberOfKeys = existingKeySettings.getMaxKeys(); // numberPicker maximum value
-        keyUsedForCar.setText("key: " + keyNumberForAccessRightChangeExisting);
-
         doChangeKey.setOnClickListener(listener);
-
         return view;
     }
 
@@ -277,12 +238,9 @@ public class ApplicationKeyChangeFragment extends Fragment {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                     show.dismiss();
-
                     DesfireKey key = keys.get(position);
-
                     listener.onKey(key);
                 }
-
             });
         } else {
             Log.d(TAG, "No " + type + " keys found");
@@ -317,14 +275,6 @@ public class ApplicationKeyChangeFragment extends Fragment {
 
     public DesfireApplication getApplication() {
         return application;
-    }
-
-    public byte[] getOldKeyForChanging() {
-        return oldKeyForChanging;
-    }
-
-    public byte[] getNewKeyForChanging() {
-        return newKeyForChanging;
     }
 
     public String getChangeKeyOldKey() {

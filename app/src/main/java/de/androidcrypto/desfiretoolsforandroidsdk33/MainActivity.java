@@ -516,32 +516,24 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
 
                 if (applicationDetail instanceof ApplicationDetailFile) {
                     ApplicationDetailFile file = (ApplicationDetailFile) applicationDetail;
-
                     final DesfireFile desfireFile = file.getFile();
-
                     Log.d(TAG, "Select file " + desfireFile);
-
                     if (desfireFile.isContent()) {
                         Log.d(TAG, "Already read file content");
-
                         showFileFragment(desfireFile);
-
                         return;
                     }
 
                     if (!isConnected()) {
                         onTagLost();
-
                         return;
                     }
 
                     if (!desfireFile.isFreeReadWriteAccess()) {
                         if (authenticatedKey != null) {
                             Log.d(TAG, "Already authenticated using key " + authenticatedKey.getIndex());
-
                             if (desfireFile.freeReadAccess() || desfireFile.isReadAccess(authenticatedKey.getIndex())) {
                                 Log.d(TAG, "Already authenticated with read file access");
-
                                 if (!desfireFile.freeReadAccess()) {
                                     try {
                                         if (authenticate(authenticatedKey)) {
@@ -555,9 +547,7 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
                                 } else {
                                     readFile(desfireFile);
                                 }
-
                                 showFileFragment(desfireFile);
-
                                 return;
                             }
                         }
@@ -566,89 +556,63 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
 
                             @Override
                             public void onKeyNumber(int index, final String access) {
-
                                 if (!isConnected()) {
                                     onTagLost();
-
                                     return;
                                 }
-
                                 final DesfireApplicationKey desfire = application.getKeys().get(index);
-
                                 showKeySelector(application.getKeySettings().getType(), new OnKeyListener() {
-
                                     @Override
                                     public void onKey(DesfireKey key) {
                                         try {
                                             DesfireApplicationKey clone = new DesfireApplicationKey(desfire.getIndex(), key);
-
                                             if (authenticate(clone)) {
                                                 MainActivity.this.authenticatedKey = clone;
-
                                                 if (desfireFile.freeReadAccess() || access.contains("R")) {
                                                     readFile(desfireFile);
                                                 }
-
                                                 showFileFragment(desfireFile);
-
                                                 showToast(R.string.applicationAuthenticatedSuccess);
                                             } else {
                                                 showToast(R.string.applicationAuthenticatedFail);
                                             }
-
                                         } catch (Exception e) {
                                             Log.d(TAG, "Unable to authenticate", e);
-
                                             showToast(R.string.applicationAuthenticatedFail);
                                         }
-
                                     }
                                 });
-
                             }
                         });
-
 
                     } else {
                         try {
                             readFile(desfireFile);
-
                             showFileFragment(desfireFile);
                         } catch (Exception e) {
                             Log.d(TAG, "Problem reading file", e);
                         }
-
                     }
-
                 } else if (applicationDetail instanceof ApplicationDetailApplicationKey) {
                     ApplicationDetailApplicationKey key = (ApplicationDetailApplicationKey) applicationDetail;
-
                     final DesfireApplicationKey desfire = key.getKey();
-
                     Log.d(TAG, "Select key " + desfire);
-
                     DesfireKey desfireKey = desfire.getDesfireKey();
-
                     DesfireKeyType type = desfireKey.getType();
-
                     showKeySelector(type, new OnKeyListener() {
 
                         @Override
                         public void onKey(DesfireKey key) {
                             if (!isConnected()) {
                                 Log.d(TAG, "Tag lost wanting to change application");
-
                                 onTagLost();
-
                                 return;
                             }
 
                             try {
                                 DesfireApplicationKey clone = new DesfireApplicationKey(desfire.getIndex(), key);
-
                                 if (authenticate(clone)) {
                                     MainActivity.this.authenticatedKey = clone;
-
                                     showToast(R.string.applicationAuthenticatedSuccess);
                                 } else {
                                     showToast(R.string.applicationAuthenticatedFail);
@@ -658,13 +622,10 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
 
                                 showToast(R.string.applicationAuthenticatedFail);
                             }
-
                         }
                     });
                 }
-
             }
-
         });
 
         // added
@@ -1225,13 +1186,15 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
                     //byte[] newKey = newFragment.getNewKeyForChanging();
                     byte keyNumberForChanging = newFragment.getKeyNumberForChanging();
                     Log.d(TAG, "keyNumberForChanging: " + keyNumberForChanging);
-                    // todo selectKey return MifareDesfireKey and not byte[]
+
 
                     DesfireApplicationKeySettings keySettings = application.getKeySettings();
                     Log.d(TAG, keySettings.toString());
                     //if(keySettings.isRequiresMasterKeyForDirectoryList()) {
                     final List<DesfireApplicationKey> keys = application.getKeys();
-                    final DesfireApplicationKey root = keys.get(0);
+                    final DesfireApplicationKey root = keys.get(0);// is this the fixed key number ?
+                    //System.out.println("*** root: "+ root.toString());
+                    //final DesfireApplicationKey root = keys.get(keyNumberForChanging);// is this the fixed key number ?
                     showKeySelector(keySettings.getType(), new OnKeyListener() {
                         @Override
                         public void onKey(DesfireKey key) {
@@ -1242,12 +1205,9 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
                             }
                             try {
                                 DesfireApplicationKey clone = new DesfireApplicationKey(root.getIndex(), key);
+                                //System.out.println("*** clone: " + clone.toString());
                                 if (authenticate(clone)) {
                                     MainActivity.this.authenticatedKey = clone;
-                                    // todo run the code after auth here ?
-                                    //readApplicationFiles();
-                                    //showApplicationFragment();
-
                                     showToast(R.string.applicationAuthenticatedSuccess);
 
                                     try {
@@ -1911,7 +1871,7 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
 
                 // todo authenticate with a write key !
 
-                // how to authenticate for create a file ?
+                // how to authenticate for write to a file ?
                 if (application == null) {
                     System.out.println("application is null");
                 }
