@@ -8,7 +8,6 @@
 	    android:paddingRight="@dimen/activity_horizontal_fragment_margin"
 	     >
 
-
 	<Button
 		android:id="@+id/btnChangeApplicationSettings"
 		android:layout_width="wrap_content"
@@ -22,6 +21,13 @@
 		android:layout_height="wrap_content"
 		android:layout_gravity="center_horizontal"
 		android:text="change application key" />
+
+	<Button
+		android:id="@+id/btnChangeVcConfigurationKey"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_gravity="center_horizontal"
+		android:text="change vc configuration key" />
 
 	<ListView
 	        android:id="@+id/listView"

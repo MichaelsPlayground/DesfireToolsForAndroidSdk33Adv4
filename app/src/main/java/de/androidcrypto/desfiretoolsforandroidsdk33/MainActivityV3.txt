@@ -1,21 +1,38 @@
 package de.androidcrypto.desfiretoolsforandroidsdk33;
 
-import static com.github.skjolber.desfire.libfreefare.MifareDesfire.*;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.lang.ref.WeakReference;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import static com.github.skjolber.desfire.libfreefare.MifareDesfire.mifare_desfire_authenticate;
+import static com.github.skjolber.desfire.libfreefare.MifareDesfire.mifare_desfire_authenticate_aes;
+import static com.github.skjolber.desfire.libfreefare.MifareDesfire.mifare_desfire_authenticate_iso;
+import static com.github.skjolber.desfire.libfreefare.MifareDesfire.mifare_desfire_change_key;
+import static com.github.skjolber.desfire.libfreefare.MifareDesfire.mifare_desfire_change_key_settings;
+import static com.github.skjolber.desfire.libfreefare.MifareDesfire.mifare_desfire_commit_transaction;
+import static com.github.skjolber.desfire.libfreefare.MifareDesfire.mifare_desfire_create_application;
+import static com.github.skjolber.desfire.libfreefare.MifareDesfire.mifare_desfire_create_application_3k3des;
+import static com.github.skjolber.desfire.libfreefare.MifareDesfire.mifare_desfire_create_application_aes;
+import static com.github.skjolber.desfire.libfreefare.MifareDesfire.mifare_desfire_create_cyclic_record_file;
+import static com.github.skjolber.desfire.libfreefare.MifareDesfire.mifare_desfire_create_linear_record_file;
+import static com.github.skjolber.desfire.libfreefare.MifareDesfire.mifare_desfire_create_std_data_file;
+import static com.github.skjolber.desfire.libfreefare.MifareDesfire.mifare_desfire_create_value_file;
+import static com.github.skjolber.desfire.libfreefare.MifareDesfire.mifare_desfire_credit;
+import static com.github.skjolber.desfire.libfreefare.MifareDesfire.mifare_desfire_debit;
+import static com.github.skjolber.desfire.libfreefare.MifareDesfire.mifare_desfire_format_picc;
+import static com.github.skjolber.desfire.libfreefare.MifareDesfire.mifare_desfire_get_application_ids;
+import static com.github.skjolber.desfire.libfreefare.MifareDesfire.mifare_desfire_get_file_ids;
+import static com.github.skjolber.desfire.libfreefare.MifareDesfire.mifare_desfire_get_file_settings;
+import static com.github.skjolber.desfire.libfreefare.MifareDesfire.mifare_desfire_get_free_memory;
+import static com.github.skjolber.desfire.libfreefare.MifareDesfire.mifare_desfire_get_key_settings;
+import static com.github.skjolber.desfire.libfreefare.MifareDesfire.mifare_desfire_get_key_version;
+import static com.github.skjolber.desfire.libfreefare.MifareDesfire.mifare_desfire_get_value;
+import static com.github.skjolber.desfire.libfreefare.MifareDesfire.mifare_desfire_get_version;
+import static com.github.skjolber.desfire.libfreefare.MifareDesfire.mifare_desfire_read_data;
+import static com.github.skjolber.desfire.libfreefare.MifareDesfire.mifare_desfire_read_records;
+import static com.github.skjolber.desfire.libfreefare.MifareDesfire.mifare_desfire_select_application;
+import static com.github.skjolber.desfire.libfreefare.MifareDesfire.mifare_desfire_tag_new;
+import static com.github.skjolber.desfire.libfreefare.MifareDesfire.mifare_desfire_write_data;
+import static com.github.skjolber.desfire.libfreefare.MifareDesfire.mifare_desfire_write_record;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
-//import android.app.FragmentManager;
 import android.content.BroadcastReceiver;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -68,6 +85,17 @@ import com.github.skjolber.desfire.libfreefare.MifareDESFireKey;
 import com.github.skjolber.desfire.libfreefare.MifareDesfireKey1;
 import com.github.skjolber.desfire.libfreefare.MifareTag;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.lang.ref.WeakReference;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
 import de.androidcrypto.desfiretoolsforandroidsdk33.filelist.ApplicationDetail;
 import de.androidcrypto.desfiretoolsforandroidsdk33.filelist.ApplicationDetailApplicationKey;
 import de.androidcrypto.desfiretoolsforandroidsdk33.filelist.ApplicationDetailFile;
@@ -82,7 +110,7 @@ import de.androidcrypto.desfiretoolsforandroidsdk33.keys.DataSource;
  */
 
 @SuppressLint("ResourceAsColor")
-public class MainActivity extends AppCompatActivity implements ReaderCallback, FragmentManager.OnBackStackChangedListener, FileSaveFragment.Callbacks {
+public class MainActivityV3 extends AppCompatActivity implements ReaderCallback, FragmentManager.OnBackStackChangedListener, FileSaveFragment.Callbacks {
 
     private static final String ACTION_NFC_SETTINGS = "android.settings.NFC_SETTINGS";
 
@@ -101,7 +129,7 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
 
     public static final byte key_data_aes_version = 0x42;
 
-    private static final String TAG = MainActivity.class.getName();
+    private static final String TAG = MainActivityV3.class.getName();
 
     private interface OnKeyListener {
         void onKey(DesfireKey key);
@@ -261,7 +289,7 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
     @Override
     public void onBackPressed() {
         //FragmentManager fragmentManager = getFragmentManager();
-        androidx.fragment.app.FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentManager fragmentManager = getSupportFragmentManager();
 
         int count = fragmentManager.getBackStackEntryCount();
         Log.d(TAG, "onBackPressed " + count);
@@ -278,7 +306,7 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
     }
 
     private void setBackgroundColor(final int color) {
-        MainActivity.this.runOnUiThread(new Runnable() {
+        MainActivityV3.this.runOnUiThread(new Runnable() {
             public void run() {
                 View view = findViewById(R.id.rootLayout);
                 view.setBackgroundColor(getResources().getColor(color));
@@ -316,7 +344,7 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
 
                     Log.d(TAG, "Click on application " + application.getIdString());
 
-                    MainActivity.this.authenticatedKey = null;
+                    MainActivityV3.this.authenticatedKey = null;
 
                     try {
 
@@ -421,7 +449,7 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
                                 DesfireApplicationKey clone = new DesfireApplicationKey(root.getIndex(), key);
 
                                 if (authenticate(clone)) {
-                                    MainActivity.this.authenticatedKey = clone;
+                                    MainActivityV3.this.authenticatedKey = clone;
 
                                     readApplicationFiles();
 
@@ -467,7 +495,7 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
 
         });
 
-        androidx.fragment.app.FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         // Replace whatever is in the fragment_container view with this fragment,
         // and add the transaction to the back stack
         //Fragment fragment = new ApplicationNewFragment();
@@ -490,7 +518,7 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
         final MainFragment newFragment = new MainFragment();
         //getSupportFragmentManager().beginTransaction().replace(R.id.content, newFragment).commit();
 
-        androidx.fragment.app.FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         // Replace whatever is in the fragment_container view with this fragment,
         // and add the transaction to the back stack
         //Fragment fragment = new ApplicationNewFragment();
@@ -567,7 +595,7 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
                                         try {
                                             DesfireApplicationKey clone = new DesfireApplicationKey(desfire.getIndex(), key);
                                             if (authenticate(clone)) {
-                                                MainActivity.this.authenticatedKey = clone;
+                                                MainActivityV3.this.authenticatedKey = clone;
                                                 if (desfireFile.freeReadAccess() || access.contains("R")) {
                                                     readFile(desfireFile);
                                                 }
@@ -612,7 +640,7 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
                             try {
                                 DesfireApplicationKey clone = new DesfireApplicationKey(desfire.getIndex(), key);
                                 if (authenticate(clone)) {
-                                    MainActivity.this.authenticatedKey = clone;
+                                    MainActivityV3.this.authenticatedKey = clone;
                                     showToast(R.string.applicationAuthenticatedSuccess);
                                 } else {
                                     showToast(R.string.applicationAuthenticatedFail);
@@ -655,16 +683,7 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
             }
         });
 
-        // this is for changing the VC Configuration key
-        newFragment.setOnChangeVcConfigurationKeyButtonClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // this is for changing the VC Configuration key
-                showVcConfigurationKeyChangeFragment();
-            }
-        });
-
-        androidx.fragment.app.FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
 
         // Replace whatever is in the fragment_container view with this fragment,
         // and add the transaction to the back stack
@@ -778,7 +797,7 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
                             try {
                                 DesfireApplicationKey clone = new DesfireApplicationKey(root.getIndex(), key);
                                 if (authenticate(clone)) {
-                                    MainActivity.this.authenticatedKey = clone;
+                                    MainActivityV3.this.authenticatedKey = clone;
                                     // todo run the code after auth here ?
                                     //readApplicationFiles();
                                     //showApplicationFragment();
@@ -836,7 +855,7 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
 
         //getSupportFragmentManager().beginTransaction().replace(R.id.content, newFragment).commit();
         //FragmentTransaction transaction = getFragmentManager().beginTransaction();
-        androidx.fragment.app.FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
 
         // Replace whatever is in the fragment_container view with this fragment,
         // and add the transaction to the back stack
@@ -987,7 +1006,7 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
                         try {
                             DesfireApplicationKey clone = new DesfireApplicationKey(root.getIndex(), key);
                             if (authenticate(clone)) {
-                                MainActivity.this.authenticatedKey = clone;
+                                MainActivityV3.this.authenticatedKey = clone;
                                 // todo run the code after auth here ?
                                 //readApplicationFiles();
                                 //showApplicationFragment();
@@ -1118,7 +1137,7 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
                             try {
                                 DesfireApplicationKey clone = new DesfireApplicationKey(root.getIndex(), key);
                                 if (authenticate(clone)) {
-                                    MainActivity.this.authenticatedKey = clone;
+                                    MainActivityV3.this.authenticatedKey = clone;
 
                                     showToast(R.string.applicationAuthenticatedSuccess);
 
@@ -1216,7 +1235,7 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
                                 DesfireApplicationKey clone = new DesfireApplicationKey(root.getIndex(), key);
                                 //System.out.println("*** clone: " + clone.toString());
                                 if (authenticate(clone)) {
-                                    MainActivity.this.authenticatedKey = clone;
+                                    MainActivityV3.this.authenticatedKey = clone;
                                     showToast(R.string.applicationAuthenticatedSuccess);
 
                                     try {
@@ -1249,103 +1268,6 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
         transaction.commit();
     }
 
-    // added
-    private void showVcConfigurationKeyChangeFragment() {
-        Log.d(TAG, "showVcConfigurationKeyChangeFragment");
-
-        // Create new fragment and transaction
-        final ApplicationKeyChangeFragment newFragment = new ApplicationKeyChangeFragment(application);
-        System.out.println("*** applicationID: " + Utils.getHexString(application.getId()));
-        System.out.println("*** Master    AID: " + Utils.getHexString(MASTER_APPLICATION_ID));
-        if (!Arrays.equals(application.getId(), MASTER_APPLICATION_ID)) {
-            newFragment.setButtonListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-
-                    // 1 we do need to know the key number to get changed
-                    // 2 get the old key value from store
-                    // 3 get the new key from store
-                    // 4 authenticate with the old key
-                    // 5 send the change key command to PICC
-                    System.out.println("*** newKey: " + newFragment.getChangeKeyNewKey());
-                    DesfireKey desfireOldKey = newFragment.getOldDesfireKeyForChanging();
-                    DesfireKey desfireNewKey = newFragment.getNewDesfireKeyForChanging();
-                    if (desfireOldKey == null) {
-                        newFragment.setLogData("Please select the old key");
-                        return;
-                    }
-                    if (desfireNewKey == null) {
-                        newFragment.setLogData("Please select the new key");
-                        return;
-                    }
-
-                    byte[] oldKey = hexStringToByteArray(newFragment.getChangeKeyOldKey());
-                    byte[] newKey = hexStringToByteArray(newFragment.getChangeKeyNewKey());
-                    if (oldKey == null) {
-                        newFragment.setLogData("Please select the old key");
-                        return;
-                    }
-                    if (newKey == null) {
-                        newFragment.setLogData("Please select the new key");
-                        return;
-                    }
-                    //byte[] oldKey = newFragment.getOldKeyForChanging();
-                    //byte[] newKey = newFragment.getNewKeyForChanging();
-                    byte keyNumberForChanging = newFragment.getKeyNumberForChanging();
-                    Log.d(TAG, "keyNumberForChanging: " + keyNumberForChanging);
-
-
-                    DesfireApplicationKeySettings keySettings = application.getKeySettings();
-                    Log.d(TAG, keySettings.toString());
-                    //if(keySettings.isRequiresMasterKeyForDirectoryList()) {
-                    final List<DesfireApplicationKey> keys = application.getKeys();
-                    final DesfireApplicationKey root = keys.get(0);// is this the fixed key number ?
-                    //System.out.println("*** root: "+ root.toString());
-                    //final DesfireApplicationKey root = keys.get(keyNumberForChanging);// is this the fixed key number ?
-                    showKeySelector(keySettings.getType(), new OnKeyListener() {
-                        @Override
-                        public void onKey(DesfireKey key) {
-                            if (!isConnected()) {
-                                Log.d(TAG, "Tag lost wanting to select application");
-                                onTagLost();
-                                return;
-                            }
-                            try {
-                                DesfireApplicationKey clone = new DesfireApplicationKey(root.getIndex(), key);
-                                //System.out.println("*** clone: " + clone.toString());
-                                if (authenticate(clone)) {
-                                    MainActivity.this.authenticatedKey = clone;
-                                    showToast(R.string.applicationAuthenticatedSuccess);
-
-                                    try {
-                                        int result = mifare_desfire_change_key(tag, keyNumberForChanging, desfireNewKey, desfireOldKey);
-                                        newFragment.setLogData("change key result: " + result);
-                                    } catch (Exception e) {
-                                        newFragment.setLogData("Error on change key: " + e.getMessage());
-                                        e.printStackTrace();
-                                    }
-
-                                } else {
-                                    showToast(R.string.applicationAuthenticatedFail);
-                                }
-
-                            } catch (Exception e) {
-                                Log.d(TAG, "Unable to authenticate", e);
-                                showToast(R.string.applicationAuthenticatedFail);
-                            }
-                        }
-                    });
-                }
-            });
-        }
-        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        // Replace whatever is in the fragment_container view with this fragment,
-        // and add the transaction to the back stack
-        transaction.replace(R.id.content, newFragment, "changeApplicationKey");
-        transaction.addToBackStack("changeApplicationKey");
-        // Commit the transaction
-        transaction.commit();
-    }
 
     private String getName(DesfireKeyType type) {
         switch (type) {
@@ -1392,7 +1314,7 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
 
         // set freeMemory always visible
         freeMemory.setVisible(true);
-        androidx.fragment.app.FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentManager fragmentManager = getSupportFragmentManager();
         String name = fragmentManager.getBackStackEntryAt(fragmentManager.getBackStackEntryCount() - 1).getName();
 
         if (name != null && name.equals("keys")) {
@@ -1807,7 +1729,7 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
                 }
             }
         });
-        androidx.fragment.app.FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         // Replace whatever is in the fragment_container view with this fragment,
         // and add the transaction to the back stack
         transaction.replace(R.id.content, newFragment, "keys");
@@ -1906,13 +1828,13 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
             keys.add(getString(R.string.fileAccessKey, keyNumber, buffer.toString()));
         }
         String names[] = keys.toArray(new String[keys.size()]);
-        AlertDialog.Builder alertDialog = new AlertDialog.Builder(MainActivity.this);
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(MainActivityV3.this);
         LayoutInflater inflater = getLayoutInflater();
         View convertView = (View) inflater.inflate(R.layout.dialog_list, null);
         alertDialog.setView(convertView);
         alertDialog.setTitle(getString(R.string.fileAccessSelectKey));
         ListView lv = (ListView) convertView.findViewById(R.id.listView);
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_list_item_1, names);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(MainActivityV3.this, android.R.layout.simple_list_item_1, names);
         lv.setAdapter(adapter);
         final AlertDialog show = alertDialog.show();
         lv.setOnItemClickListener(new OnItemClickListener() {
@@ -1941,13 +1863,13 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
             for (int i = 0; i < names.length; i++) {
                 names[i] = getString(R.string.applicationAuthenticateKeyNameVersion, keys.get(i).getName(), keys.get(i).getVersionAsHexString());
             }
-            AlertDialog.Builder alertDialog = new AlertDialog.Builder(MainActivity.this);
+            AlertDialog.Builder alertDialog = new AlertDialog.Builder(MainActivityV3.this);
             LayoutInflater inflater = getLayoutInflater();
             View convertView = (View) inflater.inflate(R.layout.dialog_list, null);
             alertDialog.setView(convertView);
             alertDialog.setTitle(getString(R.string.applicationAuthenticateKey, getName(type)));
             ListView lv = (ListView) convertView.findViewById(R.id.listView);
-            ArrayAdapter<String> adapter = new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_list_item_1, names);
+            ArrayAdapter<String> adapter = new ArrayAdapter<String>(MainActivityV3.this, android.R.layout.simple_list_item_1, names);
             lv.setAdapter(adapter);
             final AlertDialog show = alertDialog.show();
             lv.setOnItemClickListener(new OnItemClickListener() {
@@ -2014,7 +1936,7 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
                 showFileWriteFragment(file);
             }
         });
-        androidx.fragment.app.FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         // Replace whatever is in the fragment_container view with this fragment,
         // and add the transaction to the back stack
         transaction.replace(R.id.content, newFragment, "file");
@@ -2125,7 +2047,7 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
                         try {
                             DesfireApplicationKey clone = new DesfireApplicationKey(root.getIndex(), key);
                             if (authenticate(clone)) {
-                                MainActivity.this.authenticatedKey = clone;
+                                MainActivityV3.this.authenticatedKey = clone;
                                 // todo run the code after auth here ?
                                 showToast(R.string.applicationAuthenticatedSuccess);
                                 if (finalIsButtonWritePressed) {
@@ -2192,7 +2114,7 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
             }
         });
 
-        androidx.fragment.app.FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         // Replace whatever is in the fragment_container view with this fragment,
         // and add the transaction to the back stack
         transaction.replace(R.id.content, newFragment, "fileWrite");
@@ -2343,7 +2265,7 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
                                             try {
                                                 DesfireApplicationKey clone = new DesfireApplicationKey(root.getIndex(), key);
                                                 if (authenticate(clone)) {
-                                                    MainActivity.this.authenticatedKey = clone;
+                                                    MainActivityV3.this.authenticatedKey = clone;
                                                     int result = mifare_desfire_format_picc(tag);
                                                     showToastShortToast("formatting result (0 is OK): " + String.valueOf(result));
                                                     showToast(R.string.applicationAuthenticatedSuccess);
@@ -2540,10 +2462,10 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
 
         private static final long TAG_RESCAN_INTERVAL_MS = 1000;
 
-        private WeakReference<MainActivity> activityReference;
+        private WeakReference<MainActivityV3> activityReference;
 
-        public TagPresenceScanner(MainActivity activity) {
-            this.activityReference = new WeakReference<MainActivity>(activity);
+        public TagPresenceScanner(MainActivityV3 activity) {
+            this.activityReference = new WeakReference<MainActivityV3>(activity);
         }
 
         void resume() {
@@ -2572,7 +2494,7 @@ public class MainActivity extends AppCompatActivity implements ReaderCallback, F
         public void handleMessage(android.os.Message msg) {
             //Log.v(TAG, "Handle message");
 
-            MainActivity activity = activityReference.get();
+            MainActivityV3 activity = activityReference.get();
             if (activity != null) {
                 if (activity.isConnected()) {
                     resumeDelayed();
